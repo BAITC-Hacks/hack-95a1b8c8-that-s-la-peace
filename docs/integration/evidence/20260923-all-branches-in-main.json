@@ -1,0 +1,58 @@
+{
+  "status": "PASS",
+  "checked_at": "2026-09-23T17:55:54.666111+05:00",
+  "main_sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+  "refs": [
+    {
+      "ref": "refs/heads/dev-dinmukhammed",
+      "sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/heads/dev-ilyas",
+      "sha": "d48a3783d3d75502bfb118492963de6819baa3bc",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/heads/main",
+      "sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/remotes/origin/dev-dinmukhammed",
+      "sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/remotes/origin/dev-ilyas",
+      "sha": "d48a3783d3d75502bfb118492963de6819baa3bc",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/remotes/origin/dev-zoro",
+      "sha": "04d92f2f13c2584ab59e4a7ee9dfe7456ef22363",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/remotes/origin/integration",
+      "sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    },
+    {
+      "ref": "refs/remotes/origin/main",
+      "sha": "19322a483df3f4fd11487efbf5907cfe9318f29d",
+      "commits_not_in_main": 0,
+      "ancestor_of_main": true
+    }
+  ],
+  "latest_friend_frontend_identical_to_main": true,
+  "default_branch": "main",
+  "scope": "Published branches and local heads on this computer; no claim about unpublished edits on another computer."
+}
