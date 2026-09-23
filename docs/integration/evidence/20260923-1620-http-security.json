@@ -1,0 +1,154 @@
+{
+  "status": "PASS",
+  "scope": "real loopback HTTP on owned candidate; not a load test",
+  "checks": [
+    {
+      "name": "declared oversized",
+      "status": 413,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",
+        "content-length": "129",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "actual chunked without Content-Length",
+      "status": 413,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer",
+        "content-length": "129",
+        "content-type": "application/json"
+      }
+    },
+    {
+      "name": "normal after rejection",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-length": "3108",
+        "content-type": "application/json",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-type": "text/html; charset=utf-8",
+        "accept-ranges": "bytes",
+        "content-length": "743",
+        "last-modified": "Wed, 23 Sep 2026 11:12:05 GMT",
+        "etag": "\"6ae4435e567c69494e206c3b97955679\"",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/api/health",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-length": "50",
+        "content-type": "application/json",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/docs",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-length": "1054",
+        "content-type": "text/html; charset=utf-8",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/i18n.mjs",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-type": "text/javascript; charset=utf-8",
+        "accept-ranges": "bytes",
+        "content-length": "27666",
+        "last-modified": "Wed, 23 Sep 2026 11:12:06 GMT",
+        "etag": "\"7f1b47b41766ff2f66c3f3eb8c16a8b8\"",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/search-select.mjs",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-type": "text/javascript; charset=utf-8",
+        "accept-ranges": "bytes",
+        "content-length": "7462",
+        "last-modified": "Wed, 23 Sep 2026 11:12:06 GMT",
+        "etag": "\"d2eedcea04bb2397bb614796b72514e2\"",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/catalog-guide.json",
+      "status": 200,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-type": "application/json",
+        "accept-ranges": "bytes",
+        "content-length": "759456",
+        "last-modified": "Wed, 23 Sep 2026 11:12:06 GMT",
+        "etag": "\"9ddc0a7b6f6c5f21412549e4f5aadba9\"",
+        "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/.env",
+      "status": 404,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-length": "22",
+        "content-type": "application/json",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    },
+    {
+      "name": "/generate-guide.py",
+      "status": 404,
+      "headers": {
+        "date": "Wed, 23 Sep 2026 11:14:20 GMT",
+        "server": "uvicorn",
+        "content-length": "22",
+        "content-type": "application/json",
+        "x-content-type-options": "nosniff",
+        "referrer-policy": "no-referrer"
+      }
+    }
+  ]
+}

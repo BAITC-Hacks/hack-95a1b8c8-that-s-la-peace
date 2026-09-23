@@ -1,0 +1,18 @@
+{
+  "status": "PASS",
+  "sha": "e70b3be0d2cf64b9a8e6a826920a8ed540b7b79c",
+  "source": "fresh clone from official GitHub personal branch before shared publication",
+  "path": "D:\\HackAI\\Thats La Peace team project\\.verification\\clean-final-20260923-1625",
+  "runtime_only_install": "requirements.txt --no-cache-dir",
+  "pip_check": "PASS",
+  "initial_smoke": "PASS 10.78 ms",
+  "restart": "PASS identical whole recommendation response",
+  "live_browser": {
+    "ours_real_requests": 20,
+    "ilyas_checks": 23,
+    "ux_checks": 15,
+    "network_checks": 5
+  },
+  "personal_keys_required": false,
+  "dirty_worktree": false
+}
