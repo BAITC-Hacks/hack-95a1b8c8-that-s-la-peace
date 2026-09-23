@@ -49,8 +49,8 @@ const baseQuery = {
   async function fill(request) {
     await page.getByLabel('Город', {exact: true}).selectOption(request.city);
     await page.getByLabel('Дата события').fill(request.event_date);
-    await page.getByLabel('Формат мероприятия').selectOption(request.event_type);
-    await page.getByLabel('Кого или что ищем').selectOption(request.category);
+    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption(request.event_type);
+    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption(request.category);
     await page.getByLabel('Бюджет, ₸').fill(String(request.budget_kzt));
     const optional = page.locator('details.optional-fields');
     if (!(await optional.getAttribute('open') !== null)) await optional.locator('summary').click();
@@ -126,7 +126,7 @@ const baseQuery = {
     assert.deepEqual(changed, [kind === 'change_date' ? 'event_date' : 'budget_kzt']);
     // An available suggestion must not silently change the form or issue a request.
     assert.equal(await page.getByLabel('Дата события').inputValue(), previousRequest.event_date);
-    assert.equal(await page.getByLabel('Бюджет, ₸').inputValue(), String(previousRequest.budget_kzt));
+    assert.equal((await page.getByLabel('Бюджет, ₸').inputValue()).replace(/\s/g, ''), String(previousRequest.budget_kzt));
     const countBefore = capturedRequests.length;
     const result = await act(label, suggestion.request,
       () => page.locator('button[data-suggestion-kind="' + kind + '"]').click());
@@ -134,7 +134,7 @@ const baseQuery = {
     assert.equal(result.status, 'matched');
     assert.equal(result.eligible_count, suggestion.eligible_count);
     assert.equal(await page.getByLabel('Дата события').inputValue(), suggestion.request.event_date);
-    assert.equal(await page.getByLabel('Бюджет, ₸').inputValue(), String(suggestion.request.budget_kzt));
+    assert.equal((await page.getByLabel('Бюджет, ₸').inputValue()).replace(/\s/g, ''), String(suggestion.request.budget_kzt));
     return result;
   }
 
@@ -160,6 +160,12 @@ const baseQuery = {
     assert.equal(meta.dataset_version, catalogVersion);
     assert.deepEqual(meta.date_range, {min: '2026-09-23', max: '2026-12-31'});
     await state('idle');
+    // Exercise explicit submissions and all catalog outcomes; UX auto mode has its own live checks.
+    if (await page.locator('.auto-toggle input').count()) {
+      await page.locator('.auto-toggle input').uncheck();
+      await page.locator('.compatibility-toggle').waitFor({state: 'visible'});
+      await page.locator('.compatibility-toggle input').uncheck();
+    }
     assert.equal(await page.locator('[name=event_date]').getAttribute('min'), meta.date_range.min);
     assert.equal(await page.locator('[name=event_date]').getAttribute('max'), meta.date_range.max);
 
