@@ -314,3 +314,82 @@ def test_compact_explanation_does_not_invent_optional_requests(write_catalog, qu
     assert "язык" not in prefix
     assert "лимит" not in prefix
     assert "неприменимо" not in prefix
+
+
+def test_real_ensemble_excerpt_keeps_one_complete_package(catalog, query):
+    response = recommend(catalog, {
+        **query, "event_date": "2026-10-16", "category": "Лайв-бэнд", "budget_kzt": 1150000,
+    })
+    card = next(card for card in response["cards"] if card["id"] == "HK-31819")
+    source = next(profile for profile in catalog.profiles if profile["id"] == card["id"])
+    excerpt = card["description_excerpt"]
+    assert excerpt.startswith("Большой состав группы")
+    assert "4 профессиональных вокалиста" in excerpt
+    assert "струнный квартет (4 музыканта)" in excerpt
+    assert excerpt.endswith("звукорежиссёр")
+    assert "Расширенный состав" not in excerpt and "Репертуар:" not in excerpt
+    assert excerpt in source["description"] and len(excerpt) <= 260
+
+
+def test_package_boundaries_do_not_depend_on_profile_id_or_band_name(write_catalog, query):
+    first = "Базовый состав группы Север: вокалист, гитарист, барабанщик "
+    second = "Полный состав группы Юг: 4 вокалиста, струнный квартет, саксофон "
+    description = first + second + "Репертуар: современные песни и джаз."
+    loaded = load_catalog(write_catalog([{"id": "UNRELATED", "description": description}]))
+    excerpt = recommend(loaded, query)["cards"][0]["description_excerpt"]
+    assert excerpt == second.strip()
+    assert excerpt in description
+
+
+def test_sparse_real_description_uses_catalog_facts_without_advertising(catalog, query):
+    response = recommend(catalog, {
+        **query, "event_date": "2026-10-17", "category": "Лайв-бэнд", "budget_kzt": 1500000,
+        "language": None, "duration_hours": None,
+    })
+    card = next(card for card in response["cards"] if card["id"] == "HK-25279")
+    source = next(profile for profile in catalog.profiles if profile["id"] == card["id"])
+    assert card["description_excerpt"] in source["description"]
+    assert "сверкаем" not in card["explanation"]
+    assert "В профиле: языки — русский; на площадке до 5 ч" in card["explanation"]
+    assert "запрошен" not in card["explanation"]
+    assert card["explanation"].count(".") == 2
+
+
+@pytest.mark.parametrize("max_hours,expected", [
+    ("5", "на площадке до 5 ч"),
+    ("", "работа не привязана к присутствию по часам"),
+])
+def test_sparse_description_fallback_handles_presence_truthfully(write_catalog, query, max_hours, expected):
+    loaded = load_catalog(write_catalog([{
+        "id": "SPARSE", "description": "Мы создаём прекрасную атмосферу вашего события!",
+        "languages": "русский|английский", "max_hours": max_hours,
+    }]))
+    card = recommend(loaded, {**query, "language": None, "duration_hours": None})["cards"][0]
+    assert "В профиле: языки — русский, английский" in card["explanation"]
+    assert expected in card["explanation"]
+    assert "прекрасную атмосферу" not in card["explanation"]
+    assert card["description_excerpt"] == "Мы создаём прекрасную атмосферу вашего события"
+
+
+def test_unsegmented_long_preview_is_not_used_as_a_reason(write_catalog, query):
+    description = "Саксофон и скрипка в программе " * 20
+    loaded = load_catalog(write_catalog([{"description": description, "max_hours": "5"}]))
+    card = recommend(loaded, query)["cards"][0]
+    assert card["description_excerpt"] in description
+    assert len(card["description_excerpt"]) <= 260
+    assert "Из описания:" not in card["explanation"]
+    assert "В профиле:" in card["explanation"]
+
+
+@pytest.mark.parametrize("prefix", ["", "Большой состав: "])
+def test_truncated_source_with_late_qualification_is_not_a_reason(write_catalog, query, prefix):
+    description = prefix + ("Саксофон, скрипка, барабанщик, гитарист, вокалист, " * 8)
+    description += "не входят в основную программу и доступны только за отдельную плату."
+    assert description.index("не входят") > 260
+    loaded = load_catalog(write_catalog([{"description": description, "max_hours": "5"}]))
+    card = recommend(loaded, query)["cards"][0]
+    assert card["description_excerpt"] in description
+    assert 0 < len(card["description_excerpt"]) <= 260
+    assert "Из описания:" not in card["explanation"]
+    assert "В профиле:" in card["explanation"]
+    assert "Саксофон" not in card["explanation"]

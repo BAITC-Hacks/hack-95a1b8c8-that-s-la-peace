@@ -3,17 +3,48 @@ from contextlib import asynccontextmanager
 import logging
 from pathlib import Path
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from backend.catalog import load_catalog
+from backend.catalog import CatalogError, load_catalog
 from backend.matching import recommend
 from backend.schemas import RecommendationRequest, RecommendationResponse
 
 ROOT = Path(__file__).resolve().parents[1]
 log = logging.getLogger(__name__)
+
+# Keep this list aligned with actual imports and frontend/serve.mjs.
+# Repository instructions, preview servers and configuration are never assets.
+PUBLIC_FRONTEND_FILES = frozenset({
+    "index.html", "styles.css", "view.mjs", "api.mjs", "app.mjs",
+})
+
+
+class PublicFrontendFiles(StaticFiles):
+    """Serve only explicit browser assets; retain Starlette MIME/HEAD handling."""
+
+    async def get_response(self, path: str, scope):
+        public_path = "index.html" if path in ("", ".") else path
+        if public_path not in PUBLIC_FRONTEND_FILES:
+            raise HTTPException(status_code=404)
+        return await super().get_response(public_path, scope)
+
+
+def catalog_diagnostic(exc: Exception) -> str:
+    """Explain known loader errors locally without logging source records."""
+    cause = exc.__cause__ or exc
+    if isinstance(cause, FileNotFoundError):
+        return "Файл каталога отсутствует."
+    if isinstance(cause, PermissionError):
+        return "Нет доступа для чтения файла каталога."
+    if isinstance(cause, UnicodeError):
+        return "Файл каталога должен иметь кодировку UTF-8."
+    if isinstance(exc, CatalogError):
+        # CatalogError contains schema/row/field diagnostics, not raw CSV rows.
+        return str(exc)
+    return "Не удалось прочитать или проверить файл каталога."
 
 
 def error_response(status: int, code: str, message: str, fields: dict | None = None):
@@ -33,7 +64,7 @@ def create_app(data_path: Path | None = None, frontend_dir: Path | None = None) 
             application.state.catalog = load_catalog(catalog_path)
         except (OSError, ValueError, UnicodeError) as exc:
             # Do not echo input data or machine paths to an API caller.
-            log.error("Catalog unavailable (%s)", type(exc).__name__)
+            log.error("Catalog unavailable (%s): %s", type(exc).__name__, catalog_diagnostic(exc))
         yield
 
     application = FastAPI(
@@ -105,12 +136,14 @@ def create_app(data_path: Path | None = None, frontend_dir: Path | None = None) 
             return error_response(422, "invalid_request", "Проверьте параметры мероприятия.", fields)
         return recommend(catalog, query.model_dump())
 
-    # API has priority over the static mount. Never mount ROOT or data/.
+    # API has priority; only the explicit public frontend assets are served.
     if ui_path.is_dir() and (ui_path / "index.html").is_file():
-        application.mount("/", StaticFiles(directory=ui_path, html=True, follow_symlink=False), name="frontend")
+        application.mount("/", PublicFrontendFiles(directory=ui_path, html=False, follow_symlink=False), name="frontend")
     else:
         @application.get("/", include_in_schema=False)
         def pending_frontend():
+            if application.state.catalog is None:
+                return unavailable()
             return error_response(503, "service_unavailable", "API доступен через /api и /docs; интерфейс команды ещё не подключён.")
     return application
 
