@@ -1,0 +1,103 @@
+{
+  "started_at": "2026-09-23T12:10:34.936Z",
+  "base_url": "http://127.0.0.1:8016",
+  "declared_source": "root 9a plus frozen calendar clarification text; port 8016 supplied by root; Git not accessed",
+  "real_api_only": true,
+  "scope": "Date-level availability is scoped to the selected service group; no proof of hourly availability",
+  "limitations": [
+    "CSV busy_dates contains dates, not hourly intervals. max_hours is a presence limit, not a booking slot. No hourly availability has been invented or tested."
+  ],
+  "checks": [
+    {
+      "name": "Zero availability in selected florist group does not disable the date",
+      "status": "PASS",
+      "calendar_available": 0,
+      "calendar_day_enabled": true,
+      "calendar_day_clicked": true,
+      "zero_day_hint_visible": true,
+      "no_hourly_booking_data_hint_visible": true,
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 0,
+      "exclusions": {
+        "busy": 1,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "visible_ids": [],
+      "outcome": "no_matches"
+    },
+    {
+      "name": "Same city/date/event/budget with another service returns real matches",
+      "status": "PASS",
+      "calendar_available": 3,
+      "calendar_day_enabled": true,
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 3,
+      "exclusions": {
+        "busy": 2,
+        "budget": 0,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "visible_ids": [
+        "HK-37181",
+        "HK-80581",
+        "HK-97041"
+      ],
+      "outcome": "matched"
+    }
+  ],
+  "page_errors": [],
+  "browser": "153.0.4234.48",
+  "view_sha256": "3f66f6cbd991921554f7a55200fcdd2c8ebf452900bdbe4c3fc1a7d43d666806",
+  "status": "PASS",
+  "completed_at": "2026-09-23T12:10:37.288Z",
+  "locale_followup": {
+    "checked_at": "2026-09-23T12:13:02.897Z",
+    "base_url": "http://127.0.0.1:8016",
+    "checks": [
+      {
+        "locale": "ru",
+        "status": "PASS",
+        "zero_day_hint": "Даты с 0 тоже можно выбрать.",
+        "booking_time_hint": "Время бронирований в каталоге не указано.",
+        "day_enabled": true
+      },
+      {
+        "locale": "kk",
+        "status": "PASS",
+        "zero_day_hint": "0 көрсетілген күндерді де таңдауға болады.",
+        "booking_time_hint": "Каталогта брондау уақыты көрсетілмеген.",
+        "day_enabled": true
+      },
+      {
+        "locale": "en",
+        "status": "PASS",
+        "zero_day_hint": "Dates with 0 are selectable too.",
+        "booking_time_hint": "Booking times are not provided in the catalog.",
+        "day_enabled": true
+      }
+    ]
+  }
+}
