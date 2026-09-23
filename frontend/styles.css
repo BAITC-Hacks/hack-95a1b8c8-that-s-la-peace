@@ -256,7 +256,10 @@ h1 { font-size: clamp(32px, 3.3vw, 44px); line-height: 1.15; letter-spacing: -.0
 .form-settings .compatibility-toggle input { width: 20px; height: 20px; min-height: 20px; margin: 1px 0 0; padding: 0; accent-color: var(--green); }
 .form-settings .field-hint { margin: 0; font-size: 13px; }
 .form-settings .auto-toggle + .field-hint { margin-left: 30px; }
-.price-guide { margin-top: 16px; padding: 12px 14px; }
+.price-guide { margin: 0; padding: 12px 14px; }
+.price-note { display: block; white-space: normal; max-width: 18ch; margin-left: 0; }
+@media (max-width: 900px) { .price-note { text-align: left; } }
+.result-link { display: flex; align-items: center; justify-content: center; min-height: 44px; margin-top: 8px; color: var(--green); text-underline-offset: 4px; }
 .price-guide h3 { font-size: 14px; margin-bottom: 4px; }
 .price-guide .guide-price { font-size: 16px; line-height: 1.5; margin-top: 4px; }
 .price-guide p + p { margin-top: 4px; }

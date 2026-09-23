@@ -180,7 +180,12 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   settings.append(el('summary', '', 'Настройки подбора'), autoWrap, compatibilityWrap);
   const priceGuide = el('aside', 'price-guide');
   priceGuide.hidden = true;
-  fieldset.append(grid, priceGuide, optional, settings, submitButton);
+  priceGuide.classList.add('field-wide');
+  fields.budget_kzt.wrap.before(priceGuide);
+  const resultLink = el('a', 'result-link', 'Посмотреть результат');
+  resultLink.href = `#${uid}-results-title`;
+  resultLink.hidden = true;
+  fieldset.append(grid, optional, settings, submitButton, resultLink);
   form.append(fieldset);
   const calendarNote = el("p", "form-note", "Доступные даты появятся после загрузки каталога.");
   dateCalendar.append(calendarNote);
@@ -191,6 +196,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   const resultsHeader = el("div", "results-heading");
   const resultsTitle = el("h2", "", "Ваши варианты");
   resultsTitle.id = `${uid}-results-title`;
+  resultsTitle.tabIndex = -1;
   const resultsMeta = el("span", "results-meta", "До 3 рекомендаций");
   resultsHeader.append(resultsTitle, resultsMeta);
   const catalogNotice = el("p", "catalog-notice", "Демонстрационный каталог. Имена изменены.");
@@ -261,6 +267,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   }
 
   function showState(kind, title, message, retry = null) {
+    resultLink.hidden = true;
     const state = el("div", `result-state${kind === "error" ? " is-error" : kind === "loading" ? " is-loading" : ""}`);
     state.dataset.state = kind;
     const graphic = el("div", "state-graphic");
@@ -367,7 +374,10 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     previous.type = next.type = 'button';
     previous.setAttribute('aria-label', 'Предыдущий месяц'); next.setAttribute('aria-label', 'Следующий месяц');
     previous.disabled = calendarMonth === minMonth; next.disabled = calendarMonth === maxMonth;
-    const monthLabel = el('strong', 'calendar-month-label', new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : locale === 'en' ? 'en-GB' : 'ru-RU', {month:'long', year:'numeric', timeZone:'UTC'}).format(new Date(Date.UTC(year, month - 1, 1))));
+    // Some browsers lack Kazakh ICU names and return "M10" / English weekdays.
+    const kkMonths = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+    const monthText = locale === 'kk' ? `${year} ж. ${kkMonths[month - 1]}` : new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ru-RU', {month:'long', year:'numeric', timeZone:'UTC'}).format(new Date(Date.UTC(year, month - 1, 1)));
+    const monthLabel = el('strong', 'calendar-month-label', monthText);
     monthLabel.setAttribute('aria-live', 'polite');
     const changeMonth = delta => {
       calendarMonth = new Date(Date.UTC(year, month - 1 + delta, 1)).toISOString().slice(0, 7);
@@ -378,7 +388,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     previous.addEventListener('click', () => changeMonth(-1)); next.addEventListener('click', () => changeMonth(1));
     heading.append(previous, monthLabel, next);
     const weekdays = el('div', 'calendar-weekdays'); weekdays.setAttribute('aria-hidden', 'true');
-    for (let day = 0; day < 7; day++) weekdays.append(el('span', '', new Intl.DateTimeFormat(locale === 'kk' ? 'kk-KZ' : locale === 'en' ? 'en-GB' : 'ru-RU', {weekday:'short', timeZone:'UTC'}).format(new Date(Date.UTC(2026, 8, 28 + day)))));
+    for (let day = 0; day < 7; day++) weekdays.append(el('span', '', locale === 'kk' ? ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сб', 'Жс'][day] : new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ru-RU', {weekday:'short', timeZone:'UTC'}).format(new Date(Date.UTC(2026, 8, 28 + day)))));
     const days = el('div', 'calendar-days');
     const first = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
     for (let index = 0; index < first; index++) days.append(el('span', 'calendar-empty'));
@@ -533,7 +543,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
         const identity = el("div");
         identity.append(el("p", "card-category", card.category), el("h3", "", card.name), el("p", "card-city", card.city));
         const price = el("p", "card-price", `от ${money.format(card.price_from_kzt)} ₸`);
-        price.append(el("span", "price-note", "за мероприятие"));
+        price.append(el("span", "price-note", "начальная цена по каталогу"));
         top.append(identity, price);
         const explanation = el("div", "explanation");
         explanation.append(el("p", "explanation-label", "Почему подходит"), el("p", "", card.explanation));
@@ -610,6 +620,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       if (seen.size) nodes.push(suggestions);
     }
     output.replaceChildren(...nodes);
+    resultLink.hidden = false;
     refreshLanguage();
   }
 

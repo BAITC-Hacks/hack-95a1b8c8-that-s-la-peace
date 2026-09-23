@@ -108,6 +108,7 @@ async function bounded(promise, ms=12000) {
       await page.getByLabel('Дата события',{exact:true}).fill('15.10.2026');
       assert.match(await page.locator('.guide-count').textContent(),/7.*9/);
       assert.equal(await field('budget_kzt').inputValue(),'');
+      assert.ok(await page.locator('.price-guide').evaluate(node => Boolean(node.compareDocumentPosition(document.querySelector('[name=budget_kzt]')) & Node.DOCUMENT_POSITION_FOLLOWING)), 'Show real catalog prices before asking for a budget.');
       await sleep(800);assert.equal(posted.length,0,'Incomplete form must not auto-submit.');
       return {city:50,group:9,available_before_budget:7};
     });
@@ -197,6 +198,15 @@ async function bounded(promise, ms=12000) {
         assert.deepEqual(await values(),before);assert.deepEqual(await ids(),beforeIds);
         assert.deepEqual(await page.locator('.explanation [data-catalog-text]').allTextContents(),explanations);
         assert.ok(await page.locator('.explanation [data-catalog-text]').evaluateAll(nodes=>nodes.every(node=>node.lang==='ru')));
+        const priceLabels = {ru:'начальная цена по каталогу', kk:'каталогтағы бастапқы баға', en:'starting catalog price'};
+        assert.deepEqual(await page.locator('.price-note').allTextContents(), Array(3).fill(priceLabels[locale]));
+        assert.equal(await page.locator('.result-link').isVisible(),true);
+        if(locale==='kk') {
+          await page.locator('.date-toggle').click();
+          assert.equal(await page.locator('.calendar-month-label').textContent(),'2026 ж. қазан');
+          assert.deepEqual(await page.locator('.calendar-weekdays span').allTextContents(),['Дс','Сс','Ср','Бс','Жм','Сб','Жс']);
+          await page.locator('.date-toggle').press('Escape');
+        }
         if(locale==='en') assert.equal(await page.getByText('Catalog descriptions and explanations are provided in Russian.',{exact:true}).isVisible(),true);
         if(locale==='kk') assert.equal(await page.getByText('Каталог сипаттамалары мен түсіндірмелері орыс тілінде берілген.',{exact:true}).isVisible(),true);
       }
@@ -282,9 +292,9 @@ async function bounded(promise, ms=12000) {
       await auto.uncheck();
     });
 
-    await check('Mobile 360/390px with an expanded calendar has no horizontal overflow',async()=>{
+    await check('Mobile 320/360/390px with an expanded calendar has no horizontal overflow',async()=>{
       const result=[];
-      for(const width of [360,390]) {
+      for(const width of [320,360,390]) {
         await page.setViewportSize({width,height:844});
         if(!await page.locator('.date-calendar').isVisible()) await page.locator('.date-toggle').click();
         const size=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
