@@ -35,6 +35,6 @@
 
 ## Границы приложения
 
-API и будущий frontend обслуживаются одним процессом. Только frontend разрешён для static, корень репозитория и data не раздаются. Никаких внешних API, DB, платных аккаунтов и обязательных env-переменных нет. Реальный интерфейс другого участника пока не получен; его отсутствие явно отражается на `/`, не маскируется тестовой страницей.
+API и frontend обслуживаются одним процессом. Только frontend разрешён для static, корень репозитория и data не раздаются. Никаких внешних API, DB, платных аккаунтов и обязательных env-переменных нет. Frontend из dev-zoro получает справочники через /api/meta и отправляет запросы в /api/recommendations. HTML/CSS/JavaScript без сборки и внешних runtime-зависимостей обслуживаются тем же процессом.
 
 Источники архитектурных API: [FastAPI exceptions](https://fastapi.tiangolo.com/tutorial/handling-errors/), [FastAPI lifespan](https://fastapi.tiangolo.com/advanced/events/), [Pydantic strict mode](https://docs.pydantic.dev/latest/concepts/strict_mode/). Правила кейса — docs/CASE_REQUIREMENTS.md.
