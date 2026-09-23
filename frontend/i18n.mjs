@@ -1,6 +1,7 @@
 // Interface translations only. Original profile texts and server explanations
 // are deliberately kept in their source language and marked in the UI.
 const phrases = {
+  'В списках можно печатать, чтобы найти нужное.': ['Қажеттісін табу үшін тізімдерде теруге болады.', 'Type in the lists to find what you need.'],
   "That's La Peace": ["That's La Peace", "That's La Peace"],
   "That's La Peace · HackAlem AI · 2026": ["That's La Peace · HackAlem AI · 2026", "That's La Peace · HackAlem AI · 2026"],
   'Какая услуга нужна': ['Қандай қызмет қажет', 'What service do you need'],
