@@ -40,7 +40,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   const brand = el("div", "brand");
   const mark = el("span", "brand-mark");
   mark.setAttribute("aria-hidden", "true");
-  brand.append(mark, el("span", "", "Умный подбор подрядчиков"));
+  brand.append(mark, el("span", "", "That's La Peace"));
   header.append(brand, el("span", "header-note", "Люди и места для вашего события"));
   const localeWrap = el('label', 'locale-switch', 'Язык интерфейса');
   const localeSelect = el('select');
@@ -209,13 +209,13 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   workspace.append(brief, results);
   main.append(intro, workspace);
   const footer = el("footer", "site-footer");
-  footer.append(el("span", "", "Умный подбор подрядчиков · HackAlem AI · 2026"), el("span", "", "Подбор помогает выбрать. Бронирование в сервисе не предусмотрено."));
+  footer.append(el("span", "", "That's La Peace · HackAlem AI · 2026"), el("span", "", "Подбор помогает выбрать. Бронирование в сервисе не предусмотрено."));
   shell.append(header, main, footer);
   root.replaceChildren(skip, shell);
 
   function refreshLanguage() {
     doc.documentElement.lang = locale;
-    doc.title = translate('Умный подбор подрядчиков', locale);
+    doc.title = translate("That's La Peace", locale);
     sourceLanguage.hidden = locale === 'ru';
     localizeTree(root, locale);
   }

@@ -253,5 +253,5 @@ def test_catalog_failure_logs_actionable_reason_without_http_details(tmp_path, w
 def test_public_api_uses_project_name(client):
     schema = client.get("/openapi.json")
     assert schema.status_code == 200
-    assert schema.json()["info"]["title"] == "Умный подбор подрядчиков"
+    assert schema.json()["info"]["title"] == "That's La Peace"
     assert schema.json()["info"]["version"] == "1.0.0"
