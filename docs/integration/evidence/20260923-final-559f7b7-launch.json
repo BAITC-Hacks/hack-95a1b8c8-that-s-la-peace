@@ -1,0 +1,13 @@
+{
+  "source_sha": "559f7b7ec7fec7d7976be57c5f259152076489c2",
+  "startup_ms": 1821,
+  "exe_sha": "5066586E1D48F3A8F5DDAE4630A68F2377E0F75B19EA4C07BA35FE4E0CC3FE84",
+  "health": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "source_files": false,
+  "parent_pid": 34116,
+  "PATH_during_launch": "System32 only"
+}
