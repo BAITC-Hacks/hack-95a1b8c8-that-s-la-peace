@@ -198,6 +198,13 @@ const baseQuery = {
     assert.ok(changedBudget.eligible_count >= 1);
     assert.ok(capturedRequests.at(-1).budget_kzt > 1);
 
+    const bands = await submit('live bands show distinct source facts', {...baseQuery, category: 'Лайв-бэнд', event_type: 'свадьба', budget_kzt: 1500000});
+    assert.deepEqual(bands.cards.map(c => c.id), ['HK-23752', 'HK-83709', 'HK-57480']);
+    assert.ok(bands.cards[0].description_excerpt.includes('два вокалиста'));
+    assert.ok(bands.cards[1].description_excerpt.includes('4 вокалиста'));
+    assert.ok(bands.cards[1].description_excerpt.includes('струнный квартет'));
+    assert.ok(bands.cards.every(c => !c.description_excerpt.includes('идеально впишется')));
+
     const venueQuery = {...baseQuery, category: 'Банкетный зал', event_date: '2026-11-14', budget_kzt: 6000000};
     const venues = await submit('venue calendar November 14', venueQuery);
     assert.equal(venues.eligible_count, 2);
