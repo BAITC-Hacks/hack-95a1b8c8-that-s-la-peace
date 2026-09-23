@@ -120,11 +120,12 @@ export function mountPicker(root, { loadMetadata, recommend } = {}) {
   resultsTitle.id = `${uid}-results-title`;
   const resultsMeta = el("span", "results-meta", "До 3 рекомендаций");
   resultsHeader.append(resultsTitle, resultsMeta);
+  const catalogNotice = el("p", "catalog-notice", "Демонстрационный каталог. Имена изменены.");
   const output = el("div");
   output.setAttribute("aria-live", "polite");
   output.setAttribute("aria-atomic", "false");
   const footnote = el("p", "section-footnote", "Цена «от» — нижняя граница из каталога. Итоговую стоимость и условия нужно уточнить у подрядчика.");
-  results.append(resultsHeader, output, footnote);
+  results.append(resultsHeader, catalogNotice, output, footnote);
   workspace.append(brief, results);
   main.append(intro, workspace);
   const footer = el("footer", "site-footer");
@@ -275,6 +276,9 @@ export function mountPicker(root, { loadMetadata, recommend } = {}) {
       const mode = el("p", "explanation-mode", modeLabels[data.explanation_mode]);
       mode.dataset.explanationMode = data.explanation_mode;
       summary.append(mode);
+    }
+    if (data.status === "matched" && data.eligible_count > data.cards.length) {
+      summary.append(el("p", "ranking-note", "Первые три выбраны по совпадениям описания с форматом, затем с категорией. При равенстве — по меньшей цене «от»."));
     }
     const nodes = [summary];
     const cards = data.cards.slice(0, 3);
