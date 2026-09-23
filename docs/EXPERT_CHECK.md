@@ -1,5 +1,48 @@
 # Независимая приёмка объединённой версии
 
+## Чистая проверка опубликованной dev-zoro 6039476 — 16:00–16:04 UTC+05:00
+
+Точный SHA: `603947667aa8ecd93f9a6f30f0ba339f79877274`, получен из официального
+remote в новую папку acceptance/ui-6039476. Это готовая часть Ilyas с backend
+df8ed9f; более новые исправления объяснений cfdf9c5 сюда ещё не включены.
+Новая venv, Python 3.12.14, Windows AMD64, Node 24.19.0 и Edge 153.0.4234.48.
+Runtime установлен по README через pip --no-cache-dir, без .env, аккаунтов,
+переноса пакетов или личных cookies. Playwright 1.62.1 — внешний инструмент
+приёмки, приложению не требуется. Initial sandbox ensurepip завершился ошибкой;
+обычный разрешённый запуск той же команды успешно создал окружение.
+
+```powershell
+git clone --branch dev-zoro --single-branch https://github.com/BAITC-Hacks/hack-95a1b8c8-that-s-la-peace.git ui-6039476
+Set-Location ui-6039476
+git rev-parse HEAD
+& 'C:\Users\Kazy\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --no-cache-dir -r requirements.txt
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe frontend/generate-guide.py --check
+.\.venv\Scripts\python.exe run.py --port 8013
+# Второй терминал, с PLAYWRIGHT_MODULE и UI_CHECK_OUTPUT по frontend/README:
+.\.venv\Scripts\python.exe scripts/smoke.py --base-url http://127.0.0.1:8013
+node tests/ui/live-check.cjs http://127.0.0.1:8013
+node tests/ui/ux-check.cjs http://127.0.0.1:8013
+```
+
+| Проверка | Фактический результат |
+| --- | --- |
+| SHA / чистый checkout | PASS: 6039476, git status пуст; runtime/CSV не правились |
+| Установка / pip check | PASS, фиксированные production-зависимости без конфликтов |
+| Агрегаты после Windows checkout | PASS: SHA CSV, 66 профилей, 112 групп × 100 дат, 759456 байт |
+| Live browser 16:02:55–16:03:01 | PASS: 23 проверки, 14 настоящих запросов, без JS-ошибок |
+| UX browser 16:02:55–16:03:08 | PASS: 15 проверок, 10 запросов; симуляции порядка ответа/сбоя справки явно отмечены |
+| HTTP smoke | PASS: 6/4/2 подходящих, два пустых исхода, повторяемость, оба применимых совета |
+| Остановка / повторный запуск | PASS: Ctrl+C завершил PID 14756; та же команда запустила PID 21188; повторный smoke PASS |
+| Следующая общая main / финальная форма | NOT VERIFIED: Din объединяет новый UI с cfdf9c5 и проверяет новый candidate; форму отправляет Ilyas |
+
+Сырые протоколы: [live-clean-6039476.json](../tests/ui/evidence/live-clean-6039476.json)
+и [ux-clean-6039476.json](../tests/ui/evidence/ux-clean-6039476.json). Стандартное
+поле scope скриптов само по себе не подтверждает чистый запуск; checkout,
+окружение и процесс установлены командами выше. Обе declared-версии равны
+полному 6039476. Последующее дополнение этих документов не меняет runtime.
+
 ## Последний UX-пакет — срез 23.09.2026, 15:55 UTC+05:00
 
 После прямого разрешения Ilyas включена одна строка PUBLIC_FRONTEND_FILES:
@@ -12,6 +55,8 @@ df8ed9f) плюс эта строка. UX 15/15, 10 запросов, 15:55:07�
 [ux-merged-20260923-1555.json](../tests/ui/evidence/ux-merged-20260923-1555.json).
 Зависимости взяты из ранее чисто установленной venv; это затронутая приёмка
 своей ветки, не новая чистая установка общей main. Ниже сохранён предыдущий прогон.
+
+### Предыдущий прогон 15:48
 
 Ilyas запросил 14 улучшений интерфейса. Реализация и ограничения перечислены
 в frontend/README и собственном handoff. Проверялась рабочая копия на базе
@@ -66,7 +111,7 @@ node tests/ui/network-recovery.cjs http://127.0.0.1:8007
 
 Документ фиксирует порядок будущей проверки и её реальные результаты. Общая матрица требований ведётся отдельно, здесь её копия не создаётся. Основание: главная инструкция, редакция 3, разделы 7–10; ТЗ #79-lite, «Требования» и Definition of Done; стартовые инструкции Ilyas о проверке после интеграции.
 
-**Актуальные протоколы — «Чистая приёмка 1162d459» и «Проверки UI 6f38144».**
+**Актуальный протокол своей части — «Чистая проверка опубликованной dev-zoro 6039476» выше.**
 Таблицы и записи ниже до чистой приёмки сохраняют исторический срез 14:08,
 до публикации общей версии. Их NOT VERIFIED не означает, что описанная далее
 проверка не состоялась. Новые изменения UI ещё ожидают общей интеграции.
