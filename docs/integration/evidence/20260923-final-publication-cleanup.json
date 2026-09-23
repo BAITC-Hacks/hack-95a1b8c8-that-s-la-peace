@@ -1,0 +1,96 @@
+{
+  "published_at": "2026-09-23T17:25:09+05:00",
+  "published_sha": "ba2982bf1b5a17dcecccf29e936cd7362230399d",
+  "verified_code_sha": "9be780001d993307d2daf09de1eb9a2363b87130",
+  "accepted_ilyas_sha": "d48a3783d3d75502bfb118492963de6819baa3bc",
+  "remote_verification": "main/integration/dev-dinmukhammed exact ls-remote match",
+  "published_run": {
+    "port": 8000,
+    "launcher": 35240,
+    "smoke_ms": 21.98,
+    "browser_requests": 20,
+    "status": "PASS",
+    "completed_at": "2026-09-23T17:26:34+05:00"
+  },
+  "automation": {
+    "id": "hackalem-main-45",
+    "status": "PAUSED",
+    "paused_at": "2026-09-23T17:27:37.119000+05:00"
+  },
+  "removed_worktrees": [
+    {
+      "branch": "integrate-20260923-1358",
+      "sha": "bda5f95573066ba5b88b28a5e46559c175ec33e6",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1358",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1435",
+      "sha": "1162d4595f8641bc60b0d40c9aad5a4dea74a87c",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1435",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1458-plan",
+      "sha": "fb79c6658a3e6db3785c759294563874ec7a8dba",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1458-plan",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1520",
+      "sha": "df8ed9fb569de25c2302fb00384b7a85162cc31f",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1520",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1605",
+      "sha": "cfdf9c57bc9517153082f3bff103a47c86ecf411",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1605",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1620",
+      "sha": "4be77203d7f97a8e01f7ea8922635b78e650f8c7",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1620",
+      "status": "REMOVED",
+      "history_in_main": true
+    },
+    {
+      "branch": "integrate-20260923-1650",
+      "sha": "f3e307f51ecb61778f2205e5aa4fcd292a63582d",
+      "path": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1650",
+      "status": "REMOVED",
+      "history_in_main": true
+    }
+  ],
+  "cleanup": {
+    "completed_at": "2026-09-23T17:29:17+05:00",
+    "final_worktree_removed": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\final-20260923-1712",
+    "final_worktree_sha": "ba2982bf1b5a17dcecccf29e936cd7362230399d",
+    "local_integration_removed": "13a3707c848b4bea69c34d48212d1ca09dbc38c4",
+    "remote_integration": "PRESERVED: Ilyas transition and end of use not confirmed",
+    "remote_dev_zoro": "PRESERVED: actual Ilyas branch, transition not confirmed",
+    "remote_dev_ilyas": "d48a3783d3d75502bfb118492963de6819baa3bc",
+    "remote_dev_dimalarp_deleted": "fb79c6658a3e6db3785c759294563874ec7a8dba",
+    "automation": "PAUSED after verified published run"
+  },
+  "remaining_remote_branches": [
+    "main",
+    "dev-dinmukhammed",
+    "dev-ilyas",
+    "dev-zoro",
+    "integration"
+  ],
+  "remaining_local_branches": [
+    "main",
+    "dev-dinmukhammed",
+    "dev-ilyas"
+  ],
+  "submission": "NOT VERIFIED",
+  "note": "Any following commit only records publication and cleanup; its own SHA is obtained from remote, not embedded here."
+}

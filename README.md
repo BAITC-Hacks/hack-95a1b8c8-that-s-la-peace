@@ -140,6 +140,6 @@ node tests/ui/ux-check.cjs http://127.0.0.1:8000
 
 ## Совместная работа и сдача
 
-Опубликованная общая версия — `main`; backend-ветка — `dev-dinmukhammed`. Целевая frontend-ветка — `dev-ilyas`, но фактически подтверждена **`dev-zoro`**: переход выполняет и подтверждает Ilyas. Общую сборку публикует Dinmukhammed, форму сдаёт капитан Ilyas. Git push сам по себе не является подачей решения.
+Опубликованная общая версия — `main`; backend-ветка — `dev-dinmukhammed`. Ветка `dev-ilyas` создана со всей готовой историей Ilyas. Его переход с **`dev-zoro`** на другом компьютере пока не подтверждён, поэтому старая ветка временно сохранена. Общую сборку публикует Dinmukhammed, форму сдаёт капитан Ilyas. Git push сам по себе не является подачей решения.
 
 Правила и владение файлами — [AGENTS](AGENTS.md), общий план — [00_SHARED_PLAN](docs/prompts/00_SHARED_PLAN.md), персональные задачи — [Dinmukhammed](docs/prompts/01_DINMUKHAMMED.md) и [Ilyas](docs/prompts/02_FRIEND.md). Одноразовая проверка перед личным коммитом описана в [CHECKPOINT](docs/CHECKPOINT.md); актуальный статус и требования — [STATE](docs/STATE.md) и [COMPLIANCE](docs/COMPLIANCE.md).
