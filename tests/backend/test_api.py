@@ -248,3 +248,10 @@ def test_catalog_failure_logs_actionable_reason_without_http_details(tmp_path, w
             assert error["fields"] == {}
             assert expected_reason not in error["message"]
     assert expected_reason in caplog.text
+
+
+def test_public_api_uses_project_name(client):
+    schema = client.get("/openapi.json")
+    assert schema.status_code == 200
+    assert schema.json()["info"]["title"] == "Умный подбор подрядчиков"
+    assert schema.json()["info"]["version"] == "1.0.0"

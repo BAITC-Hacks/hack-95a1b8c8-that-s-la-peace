@@ -72,7 +72,7 @@ def create_app(data_path: Path | None = None, frontend_dir: Path | None = None) 
         yield
 
     application = FastAPI(
-        title="That's La Peace — подбор подрядчиков",
+        title="Умный подбор подрядчиков",
         description="До трёх рекомендаций с объяснениями на фактах выданного каталога.",
         version="1.0.0", lifespan=lifespan,
     )

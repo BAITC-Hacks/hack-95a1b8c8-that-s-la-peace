@@ -155,7 +155,7 @@ h2 { font-size: 23px; line-height: 1.25; font-weight: 600; letter-spacing: -.025
 }
 
 /* Readable form controls and quiet, local-only styling. */
-.brand { white-space: nowrap; }
+.brand { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
 .brand-mark { flex: none; }
 .header-note { font-size: 13px; max-width: 245px; letter-spacing: normal; }
 .intro-copy { max-width: 365px; }
