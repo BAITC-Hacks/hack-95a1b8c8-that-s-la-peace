@@ -11,6 +11,7 @@ from fastapi.staticfiles import StaticFiles
 from backend.catalog import CatalogError, load_catalog
 from backend.matching import recommend
 from backend.schemas import RecommendationRequest, RecommendationResponse
+from backend.security import FRONTEND_CSP, SECURITY_HEADERS, HttpSecurityMiddleware
 
 ROOT = Path(__file__).resolve().parents[1]
 log = logging.getLogger(__name__)
@@ -30,7 +31,9 @@ class PublicFrontendFiles(StaticFiles):
         public_path = "index.html" if path in ("", ".") else path
         if public_path not in PUBLIC_FRONTEND_FILES:
             raise HTTPException(status_code=404)
-        return await super().get_response(public_path, scope)
+        response = await super().get_response(public_path, scope)
+        response.headers["Content-Security-Policy"] = FRONTEND_CSP
+        return response
 
 
 def catalog_diagnostic(exc: Exception) -> str:
@@ -51,7 +54,7 @@ def catalog_diagnostic(exc: Exception) -> str:
 def error_response(status: int, code: str, message: str, fields: dict | None = None):
     return JSONResponse(status_code=status, content={
         "error": {"code": code, "message": message, "fields": fields or {}}
-    })
+    }, headers=SECURITY_HEADERS)
 
 
 def create_app(data_path: Path | None = None, frontend_dir: Path | None = None) -> FastAPI:
@@ -74,6 +77,7 @@ def create_app(data_path: Path | None = None, frontend_dir: Path | None = None) 
         version="1.0.0", lifespan=lifespan,
     )
     application.state.catalog = None
+    application.add_middleware(HttpSecurityMiddleware)
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(request: Request, exc: RequestValidationError):

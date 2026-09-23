@@ -329,7 +329,7 @@ def test_real_ensemble_excerpt_keeps_one_complete_package(catalog, query):
     assert excerpt.endswith("звукорежиссёр")
     assert "Расширенный состав" not in excerpt and "Репертуар:" not in excerpt
     assert excerpt in source["description"] and len(excerpt) <= 260
-    assert "стоимость этого состава нужно уточнить" in card["explanation"]
+    assert "стоимость большого состава отдельно не указана, её нужно уточнить" in card["explanation"]
     assert "стоимость" not in excerpt
     assert card["explanation"].count(".") == 2
 
@@ -413,3 +413,180 @@ def test_package_price_qualification_is_separate_from_source(write_catalog, quer
     else:
         assert "стоимость этого" not in card["explanation"]
     assert card["explanation"].count(".") == 2
+
+
+B03_CASES = [{'number': 1,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-15',
+              'event_type': 'корпоратив',
+              'category': 'Ведущий',
+              'budget_kzt': 1000000,
+              'duration_hours': 6,
+              'language': 'английский'},
+  'id': 'HK-44733',
+  'before': 'Алматы, «корпоратив»: цена от 1 000 000 ₸ в бюджете; в календаре на 2026-10-15 нет '
+            'занятости; язык — английский; 6 ч при лимите 6 ч. Из описания: «Веду как ламповые '
+            'вечера от 8 человек, так и крупные бизнес форумы на 3000 человек».',
+  'order': ['HK-44733', 'HK-35215'],
+  'excerpt': 'Веду как ламповые вечера от 8 человек, так и крупные бизнес форумы на 3000 человек'},
+ {'number': 2,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-15',
+              'event_type': 'свадьба',
+              'category': 'Фотограф',
+              'budget_kzt': 1000000,
+              'duration_hours': None,
+              'language': None},
+  'id': 'HK-91112',
+  'before': 'Алматы, «свадьба»: цена от 300 000 ₸ в бюджете; в календаре на 2026-10-15 нет '
+            'занятости. В профиле: языки — русский; на площадке до 10 ч.',
+  'order': ['HK-91112', 'HK-76268', 'HK-16628'],
+  'excerpt': 'Я — свадебный фотограф с тонким чувством эстетики и эмоций'},
+ {'number': 3,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-11-14',
+              'event_type': 'корпоратив',
+              'category': 'Банкетный зал',
+              'budget_kzt': 6000000,
+              'duration_hours': None,
+              'language': None},
+  'id': 'HK-90011',
+  'before': 'Алматы, «корпоратив»: цена от 3 200 000 ₸ в бюджете; в календаре на 2026-11-14 нет '
+            'занятости. Из описания: «Панорамные окна, вместимость зала до 200 гостей, свой '
+            'кейтеринг и парковка для гостей мероприятия».',
+  'order': ['HK-90011', 'HK-64395'],
+  'excerpt': 'Панорамные окна, вместимость зала до 200 гостей, свой кейтеринг и парковка для '
+             'гостей мероприятия'},
+ {'number': 4,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-15',
+              'event_type': 'корпоратив',
+              'category': 'Лайв-бэнд',
+              'budget_kzt': 1500000,
+              'duration_hours': None,
+              'language': None},
+  'id': 'HK-23752',
+  'before': 'Алматы, «корпоратив»: цена от 1 150 000 ₸ в бюджете; в календаре на 2026-10-15 нет '
+            'занятости. Из описания: «Расширенный состав Thunder Breath Band: 🎤 два вокалиста 🎤 '
+            'вокалистка 🥁 барабанщик 🎸 бас-гитарист 🎸 соло-гитарист 🎺 труба 🎷 саксофон 🎵 тромбон '
+            'Репертуар включает ретро-хиты, треки из нулевых, современные композиции и казахскую '
+            'музыку»; стоимость этого состава нужно уточнить.',
+  'order': ['HK-23752', 'HK-83709', 'HK-57480'],
+  'excerpt': 'Расширенный состав Thunder Breath Band: 🎤 два вокалиста 🎤 вокалистка 🥁 барабанщик 🎸 '
+             'бас-гитарист 🎸 соло-гитарист 🎺 труба 🎷 саксофон 🎵 тромбон Репертуар включает '
+             'ретро-хиты, треки из нулевых, современные композиции и казахскую музыку'},
+ {'number': 5,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-15',
+              'event_type': 'свадьба',
+              'category': 'Флорист',
+              'budget_kzt': 1000000,
+              'duration_hours': 24,
+              'language': None},
+  'id': 'HK-90001',
+  'before': 'Алматы, «свадьба»: цена от 250 000 ₸ в бюджете; в календаре на 2026-10-15 нет '
+            'занятости; присутствие по часам неприменимо. Из описания: «Работаем с сезонными и '
+            'привозными цветами, собираем композиции под цветовую палитру мероприятия — от букета '
+            'невесты до оформления стола молодожёнов».',
+  'order': ['HK-90001', 'HK-39372'],
+  'excerpt': 'Работаем с сезонными и привозными цветами, собираем композиции под цветовую палитру '
+             'мероприятия — от букета невесты до оформления стола молодожёнов'},
+ {'number': 6,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-16',
+              'event_type': 'корпоратив',
+              'category': 'Лайв-бэнд',
+              'budget_kzt': 1150000,
+              'duration_hours': None,
+              'language': None},
+  'id': 'HK-31819',
+  'before': 'Алматы, «корпоратив»: цена от 1 150 000 ₸ в бюджете; в календаре на 2026-10-16 нет '
+            'занятости. Из описания: «Большой состав группы Rurouni Sound: 🎤4 профессиональных '
+            'вокалиста 🥁барабанщик,перкуссионист, 🎸бас-гитарист,соло-гитарист 🎺 труба 🎷 саксофон 🎵 '
+            'тромбон 🎻 струнный квартет (4 музыканта) 🔉звукорежиссёр»; стоимость этого состава '
+            'нужно уточнить.',
+  'order': ['HK-23752', 'HK-31819', 'HK-83709'],
+  'excerpt': 'Большой состав группы Rurouni Sound: 🎤4 профессиональных вокалиста '
+             '🥁барабанщик,перкуссионист, 🎸бас-гитарист,соло-гитарист 🎺 труба 🎷 саксофон 🎵 тромбон '
+             '🎻 струнный квартет (4 музыканта) 🔉звукорежиссёр'},
+ {'number': 7,
+  'request': {'city': 'Алматы',
+              'event_date': '2026-10-17',
+              'event_type': 'корпоратив',
+              'category': 'Лайв-бэнд',
+              'budget_kzt': 1500000,
+              'duration_hours': None,
+              'language': None},
+  'id': 'HK-25279',
+  'before': 'Алматы, «корпоратив»: цена от 800 000 ₸ в бюджете; в календаре на 2026-10-17 нет '
+            'занятости. В профиле: языки — русский; на площадке до 5 ч.',
+  'order': ['HK-57480', 'HK-25279'],
+  'excerpt': 'И да, мы действительно сверкаем — звуком, энергией и атмосферой, которую создаём на '
+             'сцене'}]
+
+
+@pytest.mark.parametrize("number", [2, 4, 5, 6, 7])
+def test_human_approved_five_explanation_revisions(catalog, number):
+    case = B03_CASES[number - 1]
+    response = recommend(catalog, case["request"])
+    assert ids(response) == case["order"]
+    card = next(card for card in response["cards"] if card["id"] == case["id"])
+    source = next(profile for profile in catalog.profiles if profile["id"] == card["id"])
+    explanation = card["explanation"]
+    assert card["description_excerpt"] in source["description"]
+    assert explanation.count(".") == 2
+    if number == 2:
+        assert "Мои кадры — не про позы, а про состояние" in explanation
+        other = next(card for card in response["cards"] if card["id"] == "HK-76268")
+        assert explanation.split(". ", 1)[1] != other["explanation"].split(". ", 1)[1]
+        assert "без позирования" not in explanation  # Do not strengthen the source claim.
+    elif number == 4:
+        for fact in ("расширенный состав", "два вокалиста и вокалистка", "ретро-хиты", "казахская музыка"):
+            assert fact in explanation
+        assert "стоимость расширенного состава отдельно не указана, её нужно уточнить" in explanation
+        assert len(explanation) < len(case["before"])
+        assert card["description_excerpt"] == case["excerpt"]
+    elif number == 5:
+        assert explanation == case["before"].replace("присутствие по часам неприменимо", "Для флориста ограничение по длительности присутствия не применяется")
+    elif number == 6:
+        for fact in ("большой состав", "4 вокалиста", "струнный квартет", "гитары", "ударные", "духовые", "звукорежиссёр"):
+            assert fact in explanation
+        assert "стоимость большого состава отдельно не указана, её нужно уточнить" in explanation
+        assert len(explanation) < len(case["before"])
+        assert card["description_excerpt"] == case["excerpt"]
+    else:
+        assert "языки — русский; на площадке до 5 ч" in explanation
+        assert "других конкретных характеристик в описании нет" in explanation
+        assert "сверкаем" not in explanation
+
+
+@pytest.mark.parametrize("number", [1, 3])
+def test_approved_host_and_venue_explanations_remain_byte_identical(catalog, number):
+    case = B03_CASES[number - 1]
+    response = recommend(catalog, case["request"])
+    card = next(card for card in response["cards"] if card["id"] == case["id"])
+    assert card["explanation"].encode("utf-8") == case["before"].encode("utf-8")
+    assert ids(response) == case["order"]
+
+
+def test_named_composition_summary_preserves_negative_inclusion(write_catalog, query):
+    description = "Большой состав Север: 4 вокалиста, гитарист, барабанщик; саксофон не входит в базовую цену и оплачивается отдельно."
+    loaded = load_catalog(write_catalog([{"id": "NEGATED", "description": description}]))
+    explanation = recommend(loaded, query)["cards"][0]["explanation"]
+    assert "саксофон не входит в базовую цену и оплачивается отдельно" in explanation
+    assert "По описанию, большой состав:" not in explanation
+
+
+def test_missing_selected_excerpt_does_not_mean_missing_facts(write_catalog, query):
+    description = "Саксофон, гитарист, барабанщик, " * 30 + "доступны только с доплатой."
+    loaded = load_catalog(write_catalog([{"description": description}]))
+    explanation = recommend(loaded, query)["cards"][0]["explanation"]
+    assert "других конкретных характеристик в описании нет" not in explanation
+
+
+def test_composition_summary_generalizes_to_different_names_and_ids(write_catalog, query):
+    description = "Большой состав Новая Группа: 4 вокалиста, струнный квартет, гитарист, барабанщик, труба и звукорежиссёр."
+    loaded = load_catalog(write_catalog([{"id": "RENAMED", "description": description}]))
+    explanation = recommend(loaded, query)["cards"][0]["explanation"]
+    assert "По описанию, большой состав: 4 вокалиста, струнный квартет" in explanation
+    assert "стоимость большого состава отдельно не указана" in explanation

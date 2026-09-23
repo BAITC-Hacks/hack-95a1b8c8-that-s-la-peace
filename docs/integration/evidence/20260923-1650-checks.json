@@ -1,0 +1,42 @@
+{
+  "checked_at": "2026-09-23T16:44:28+05:00",
+  "candidate_sha": "dc2677a31e665a7c7ae64b8c3fc2892bc59364d7",
+  "own_source_sha": "543d8090e2ccc8aede27258abb43b4360e2becbe",
+  "frontend_source_sha": "9eb9b12b6d3d809f88e8788709e89a295065c051",
+  "previous_full_verified_code_sha": "e70b3be0d2cf64b9a8e6a826920a8ed540b7b79c",
+  "application_code_diff": "empty: backend/frontend/data/scripts/tests/run.py/requirements.txt/requirements-dev.txt",
+  "new_full_pytest_run": false,
+  "previous_full_pytest": {
+    "sha": "e70b3be0d2cf64b9a8e6a826920a8ed540b7b79c",
+    "passed": 230
+  },
+  "server": {
+    "port": 8014,
+    "launcher_pid": 29548,
+    "listener_pid": 19476,
+    "working_directory": "D:\\HackAI\\Thats La Peace team project\\.integration-candidates\\20260923-1650"
+  },
+  "smoke": {
+    "status": "PASS",
+    "dataset_count": 66,
+    "dense_eligible": [
+      6,
+      4
+    ],
+    "rare_eligible": 2,
+    "empty_states": 2,
+    "repeat_order": "stable",
+    "suggestions": 2,
+    "request_ms": 12.32
+  },
+  "browser": {
+    "status": "PASS",
+    "real_requests": 20,
+    "browser_errors": 0,
+    "external_requests": 0,
+    "latency_ms_min": 57,
+    "latency_ms_max": 251
+  },
+  "human_review": "No new human review claimed",
+  "submission": "NOT CONFIRMED"
+}
