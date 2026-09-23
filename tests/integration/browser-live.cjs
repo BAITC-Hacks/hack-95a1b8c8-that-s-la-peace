@@ -46,15 +46,24 @@ const baseQuery = {
   const state = value => page.locator('[data-state="' + value + '"]').waitFor({state: 'visible'});
   const domIds = () => page.locator('[data-profile-id]').evaluateAll(nodes => nodes.map(node => node.dataset.profileId));
 
+  async function choose(name, value) {
+    const field = page.locator(`.field:has(select[name="${name}"])`);
+    const input = field.locator('.combobox-input');
+    await input.click();
+    await input.fill('');
+    await field.locator(`.combobox-option[data-value=${JSON.stringify(value)}]`).click();
+    assert.equal(await field.locator('select').inputValue(), value, `${name}: visible selection must preserve the canonical API value.`);
+  }
+
   async function fill(request) {
-    await page.getByLabel('Город', {exact: true}).selectOption(request.city);
+    await choose('city', request.city);
     await page.getByLabel('Дата события').fill(request.event_date);
-    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption(request.event_type);
-    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption(request.category);
+    await choose('event_type', request.event_type);
+    await choose('category', request.category);
     await page.getByLabel('Бюджет, ₸').fill(String(request.budget_kzt));
     const optional = page.locator('details.optional-fields');
     if (!(await optional.getAttribute('open') !== null)) await optional.locator('summary').click();
-    await page.getByLabel('Язык', {exact: true}).selectOption(request.language || '');
+    await choose('language', request.language || '');
     await page.getByLabel('Длительность, ч').fill(request.duration_hours === null ? '' : String(request.duration_hours));
   }
 
@@ -125,7 +134,7 @@ const baseQuery = {
     const changed = Object.keys(previousRequest).filter(key => previousRequest[key] !== suggestion.request[key]);
     assert.deepEqual(changed, [kind === 'change_date' ? 'event_date' : 'budget_kzt']);
     // An available suggestion must not silently change the form or issue a request.
-    assert.equal(await page.getByLabel('Дата события').inputValue(), previousRequest.event_date);
+    assert.equal(await page.locator('[name=event_date]').inputValue(), previousRequest.event_date);
     assert.equal((await page.getByLabel('Бюджет, ₸').inputValue()).replace(/\s/g, ''), String(previousRequest.budget_kzt));
     const countBefore = capturedRequests.length;
     const result = await act(label, suggestion.request,
@@ -133,7 +142,7 @@ const baseQuery = {
     assert.equal(capturedRequests.length, countBefore + 1);
     assert.equal(result.status, 'matched');
     assert.equal(result.eligible_count, suggestion.eligible_count);
-    assert.equal(await page.getByLabel('Дата события').inputValue(), suggestion.request.event_date);
+    assert.equal(await page.locator('[name=event_date]').inputValue(), suggestion.request.event_date);
     assert.equal((await page.getByLabel('Бюджет, ₸').inputValue()).replace(/\s/g, ''), String(suggestion.request.budget_kzt));
     return result;
   }
@@ -162,6 +171,8 @@ const baseQuery = {
     await state('idle');
     // Exercise explicit submissions and all catalog outcomes; UX auto mode has its own live checks.
     if (await page.locator('.auto-toggle input').count()) {
+      const settings = page.locator('details.form-settings');
+      if (await settings.getAttribute('open') === null) await settings.locator('summary').click();
       await page.locator('.auto-toggle input').uncheck();
       await page.locator('.compatibility-toggle').waitFor({state: 'visible'});
       await page.locator('.compatibility-toggle input').uncheck();
