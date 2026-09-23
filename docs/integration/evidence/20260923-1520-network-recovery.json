@@ -1,0 +1,26 @@
+{
+  "started_at": "2026-09-23T10:23:25.303Z",
+  "base_url": "http://127.0.0.1:8010",
+  "scope": "real API with isolated browser offline simulation; not backend failure injection",
+  "source_sha": "cd0970f7e4d23008637122fc1ce945c85f9a8fa3",
+  "checks": [
+    "Initial real result: three cards",
+    "Offline submission: explicit error, no cards, preserved parameters",
+    "Retry while offline: still an honest error",
+    "Connectivity restored: retry uses saved new date and actual API order",
+    "No JavaScript runtime errors"
+  ],
+  "initial_ids": [
+    "HK-44733",
+    "HK-44923",
+    "HK-77838"
+  ],
+  "restored_ids": [
+    "HK-44733",
+    "HK-88430",
+    "HK-44923"
+  ],
+  "status": "PASS",
+  "completed_at": "2026-09-23T10:23:27.193Z",
+  "browser": "153.0.4234.48"
+}
