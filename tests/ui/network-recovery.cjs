@@ -26,10 +26,11 @@ const report = {started_at: new Date().toISOString(), base_url: baseUrl,
   try {
     await page.goto(baseUrl);
     await state('idle');
+    await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
     await page.getByLabel('Город', {exact: true}).selectOption('Алматы');
     await page.getByLabel('Дата события').fill('2026-10-15');
-    await page.getByLabel('Формат мероприятия').selectOption('корпоратив');
-    await page.getByLabel('Кого или что ищем').selectOption('Ведущий');
+    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption('корпоратив');
+    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption('Ведущий');
     await page.getByLabel('Бюджет, ₸').fill('1000000');
     const initialReply = actualReply();
     await page.getByRole('button', {name: 'Подобрать варианты', exact: true}).click();
