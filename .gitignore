@@ -1,0 +1,27 @@
+# Local secrets and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.key
+*.pem
+credentials*.json
+# Local runtimes and generated outputs
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+dist/
+build/
+*.log
+# Machine-local files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+# Temporary integration worktrees must stay outside tracked sources
+.integration-candidates/
