@@ -156,3 +156,95 @@ def test_unexpected_matcher_error_is_safe_unified_503(tmp_path, query, monkeypat
         assert "SECRET_RUNTIME_PATH_AND_INTERNAL_DETAILS" not in response.text
         assert "RuntimeError" not in response.text
         assert client.get("/api/health").status_code == 200
+
+
+@pytest.fixture
+def frontend_with_private_files(tmp_path):
+    ui = tmp_path / "frontend"
+    ui.mkdir()
+    public = {
+        "index.html": "<!doctype html><title>Public UI</title>",
+        "styles.css": "body { color: black; }",
+        "app.mjs": "import './view.mjs';",
+        "view.mjs": "export const view = true;",
+        "api.mjs": "export const api = true;",
+    }
+    for name, text in public.items():
+        (ui / name).write_text(text, encoding="utf-8")
+    for name in ("AGENTS.md", "README.md", "serve.mjs", ".env.example", ".env",
+                 ".gitignore", "private.json", "dev.html", "unlisted.mjs"):
+        (ui / name).write_text("FAKE_PRIVATE_TEST_VALUE", encoding="utf-8")
+    (ui / ".git").mkdir()
+    (ui / ".git" / "config").write_text("FAKE_PRIVATE_TEST_VALUE", encoding="utf-8")
+    (tmp_path / "private.txt").write_text("FAKE_PRIVATE_TEST_VALUE", encoding="utf-8")
+    return ui, public
+
+
+@pytest.mark.parametrize("route,filename,mime", [
+    ("/", "index.html", "text/html"),
+    ("/index.html", "index.html", "text/html"),
+    ("/styles.css", "styles.css", "text/css"),
+    ("/app.mjs", "app.mjs", "text/javascript"),
+    ("/view.mjs", "view.mjs", "text/javascript"),
+    ("/api.mjs", "api.mjs", "text/javascript"),
+])
+def test_public_frontend_assets_preserve_get_head_and_mime(frontend_with_private_files, route, filename, mime):
+    ui, public = frontend_with_private_files
+    with TestClient(create_app(data_path=DATA_PATH, frontend_dir=ui)) as client:
+        response = client.get(route)
+        assert response.status_code == 200
+        assert response.text == public[filename]
+        assert response.headers["content-type"].split(";")[0] == mime
+        head = client.head(route)
+        assert head.status_code == 200
+        assert head.content == b""
+        assert head.headers["content-type"] == response.headers["content-type"]
+        assert client.get("/api/health").status_code == 200
+
+
+@pytest.mark.parametrize("route", [
+    "/AGENTS.md", "/README.md", "/serve.mjs", "/.env.example", "/.env",
+    "/.gitignore", "/.git/config", "/private.json", "/dev.html",
+    "/unlisted.mjs", "/%2eenv", "/%2e%2e/private.txt",
+])
+def test_static_server_blocks_existing_private_frontend_files(frontend_with_private_files, route):
+    ui, _ = frontend_with_private_files
+    with TestClient(create_app(data_path=DATA_PATH, frontend_dir=ui)) as client:
+        for method in (client.get, client.head):
+            response = method(route)
+            assert response.status_code == 404
+            assert "FAKE_PRIVATE_TEST_VALUE" not in response.text
+
+
+def test_missing_catalog_and_frontend_do_not_claim_api_ready(tmp_path):
+    with TestClient(create_app(data_path=tmp_path / "missing.csv", frontend_dir=tmp_path / "missing-ui")) as client:
+        error = assert_error(client.get("/"), 503, "service_unavailable")
+        assert "API доступен" not in error["message"]
+        assert "Каталог недоступен" in error["message"]
+        assert str(tmp_path) not in error["message"]
+        assert_error(client.get("/api/health"), 503, "service_unavailable")
+
+
+@pytest.mark.parametrize("failure,expected_reason", [
+    ("missing", "отсутствует"),
+    ("encoding", "UTF-8"),
+    ("header", "Заголовок CSV"),
+    ("field", "Строка 2: Поле price_from_kzt"),
+])
+def test_catalog_failure_logs_actionable_reason_without_http_details(tmp_path, write_catalog, caplog, failure, expected_reason):
+    source = tmp_path / "catalog.csv"
+    if failure == "encoding":
+        source.write_bytes(b"\xff\xfeINVALID_TEST_ENCODING")
+    elif failure == "header":
+        source.write_text("wrong,header\ninvalid,data\n", encoding="utf-8")
+    elif failure == "field":
+        source = write_catalog([{"price_from_kzt": "-1"}])
+    with caplog.at_level("ERROR", logger="backend.app"):
+        with TestClient(create_app(data_path=source, frontend_dir=tmp_path / "missing-ui")) as client:
+            response = client.get("/api/health")
+            error = assert_error(response, 503, "service_unavailable")
+            assert str(source) not in response.text
+            assert str(tmp_path) not in response.text
+            assert error["fields"] == {}
+            assert expected_reason not in error["message"]
+    assert expected_reason in caplog.text

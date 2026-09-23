@@ -87,72 +87,110 @@ def _eligible(profiles: list[dict[str, Any]], request: dict[str, Any]) -> list[d
     return [profile for profile in profiles if not any(_failures(profile, request).values())]
 
 
-def _excerpt(profile: dict[str, Any], request: dict[str, Any]) -> str:
-    """Return a concrete, exact source fragment, at most 260 characters.
+_EXCERPT_LIMIT = 260
+_SPECIFIC_STEMS = (
+    "разработ", "соглас", "интерактив", "оборудован", "мультимедийн", "dj",
+    "сценар", "печать", "кейтеринг", "парков", "скрип", "саксофон",
+    "театр", "кино", "педагог", "академ", "солист", "телеканал",
+    "репертуар", "сезон", "палитр", "документал", "фотожурнал",
+    "сценограф", "инсталляц", "подиум", "арки", "welcome", "сахар",
+    "вокал", "квартет", "брасс", "перкусс", "клавиш", "барабан",
+    "гитар", "труба", "тромбон", "струнн", "викторин", "квиз", "акустич",
+)
+_BLOCK_HEADER = re.compile(
+    r"(?<!\w)(?:(?:расширенный|большой|малый|базовый|полный|основной|"
+    r"музыкальный|камерный)\s+){0,2}"
+    r"(?:состав(?:\s+[^:.\n]{1,70})?|репертуар|оборудование|"
+    r"пакет(?:\s+[^:.\n]{1,40})?|языки(?:\s+[^:.\n]{1,30})?)\s*:",
+    re.IGNORECASE,
+)
 
-    Distinguishing services, equipment, ensemble composition and quantified
-    experience outrank purely promotional mentions of the requested event.
-    Within factual fragments, event relevance is still preferred. Long clauses
-    are scored in word-aligned windows so a fact near their end is not lost.
-    This selection changes explanation text only, never candidate ranking.
+
+def _description_evidence(text: str) -> tuple[int, bool]:
+    """A conservative factual signal, not a claim that source prose is verified."""
+    lowered = text.casefold().replace("ё", "е")
+    quantified = bool(re.search(
+        r"\d[\d ]*\s+(?:лет|год|гостей|человек|заказов|мероприятий|свадеб|съемок|вокалист)",
+        lowered,
+    ))
+    promotional = bool(re.search(
+        r"идеальн\w*|отличн\w*\s+выбор|любой\s+формат|"
+        r"незабываем\w*|сверкаем|безумн\w*\s+энергетик\w*", lowered,
+    ))
+    specificity = _overlap(text, _SPECIFIC_STEMS) + 2 * int(quantified)
+    usable = specificity > 0 and (not promotional or quantified)
+    return specificity, usable
+
+
+def _source_blocks(description: str) -> list[str]:
+    """Split exact source spans at sentences, bullets and named package headers."""
+    blocks: list[str] = []
+    for clause in re.split(r"(?<=[.!?])\s+|[\r\n•]+", description):
+        starts = sorted({0, *(match.start() for match in _BLOCK_HEADER.finditer(clause))})
+        for index, start in enumerate(starts):
+            end = starts[index + 1] if index + 1 < len(starts) else len(clause)
+            block = clause[start:end].strip()
+            if block:
+                blocks.append(block)
+    return blocks
+
+
+def _select_excerpt(profile: dict[str, Any], request: dict[str, Any]) -> tuple[str, bool]:
+    """Return source text and whether it has a complete semantic boundary.
+
+    Complete blocks take precedence over shortened previews. An oversized list
+    can end after a complete item; its heading stays attached. No sliding word
+    windows are used, so a later package cannot be attached to the previous one.
+    Source order breaks score ties. Candidate ranking is unaffected.
     """
     description = profile["description"]
-    clauses = [part.strip() for part in re.split(r"(?<=[.!?])\s+|[\r\n•]+", description) if part.strip()]
-    candidates: list[str] = []
-    for clause in clauses:
-        if len(clause) <= 260:
-            candidates.append(clause)
+    candidates: list[tuple[str, bool]] = []
+    for block in _source_blocks(description):
+        if len(block) <= _EXCERPT_LIMIT:
+            candidates.append((block, True))
             continue
-        words = list(re.finditer(r"\S+", clause))
-        right = 0
-        for left, word in enumerate(words):
-            right = max(right, left)
-            while right < len(words) and words[right].end() - word.start() <= 260:
-                right += 1
-            if right > left:
-                candidates.append(clause[word.start():words[right - 1].end()])
-    useful = [part for part in candidates if len(part) >= 30] or candidates
-    # A single unusually long token has no word-aligned window; retain the
-    # original deterministic source-only fallback rather than inventing a fact.
-    if not useful:
-        return description[:260]
+        # End at an explicit phrase/list boundary, never an arbitrary word.
+        # Emoji delimit instrument items in the provided dataset.
+        boundaries = [match.start() for match in re.finditer(
+            r"[,;](?=\s)|(?=[\U0001F300-\U0001FAFF\u2600-\u27BF])", block
+        )]
+        boundaries += [match.end() for match in re.finditer(r"[»)](?=\s)", block)]
+        for end in sorted(set(boundaries)):
+            candidate = block[:end].rstrip(" ,;")
+            if 30 <= len(candidate) <= _EXCERPT_LIMIT:
+                # The remaining text may qualify or negate this fragment.
+                # A shortened preview is never a complete evidence statement.
+                candidates.append((candidate, False))
+    if not candidates:
+        # An unsegmented malformed/very long source can only supply a preview.
+        # _card will use structured facts instead of treating that preview as
+        # a recommendation reason. Keep the text an exact source substring.
+        preview = description[:_EXCERPT_LIMIT]
+        boundary = preview.rfind(" ")
+        return (preview[:boundary] if boundary > 0 else preview), False
     stems = EVENT_STEMS.get(request["event_type"], _words(request["event_type"]))
     category = CATEGORY_STEMS.get(request["category"], _words(request["category"]))
-    specific_stems = (
-        "разработ", "соглас", "интерактив", "оборудован", "мультимедийн", "dj",
-        "сценар", "печать", "кейтеринг", "парков", "скрип", "саксофон",
-        "театр", "кино", "педагог", "академ", "солист", "телеканал",
-        "репертуар", "сезон", "палитр", "документал", "фотожурнал",
-        "сценограф", "инсталляц", "подиум", "арки", "welcome", "сахар",
-        "вокал", "квартет", "брасс", "перкусс", "клавиш", "барабан",
-        "гитар", "труба", "тромбон", "струнн",
-    )
 
-    def excerpt_score(part: str) -> tuple[int, ...]:
-        lowered = part.casefold().replace("ё", "е")
+    def excerpt_score(candidate: tuple[str, bool]) -> tuple[int, ...]:
+        part, complete = candidate
+        specificity, usable = _description_evidence(part)
         introduction = bool(re.match(
-            r"(?:меня зовут|привет|я[ ,—–-]|профессиональн\w*\s+ведущ)", lowered
+            r"(?:меня зовут|привет|я[ ,—–-]|профессиональн\w*\s+ведущ)",
+            part.casefold(),
         ))
-        quantified = bool(re.search(
-            r"\d[\d ]*\s+(?:лет|год|гостей|человек|заказов|мероприятий|свадеб|съемок|вокалист)", lowered
-        ))
-        promotional = bool(re.search(
-            r"идеальн\w*|отличн\w*\s+выбор|любой\s+формат|"
-            r"незабываем\w*\s+(?:впечатлен\w*|праздник\w*)", lowered
-        ))
-        specificity = _overlap(part, specific_stems) + 2 * int(quantified)
         return (
-            int(specificity > 0),
-            -int(promotional),
-            _overlap(part, stems),
-            specificity,
-            -int(introduction),
-            _overlap(part, category),
+            int(complete and usable), int(complete), _overlap(part, stems), specificity,
+            -int(introduction), _overlap(part, category),
         )
 
-    # max() preserves source order when factual value and relevance are tied.
-    selected = max(useful, key=excerpt_score)
-    return selected.rstrip(" .!?…") or description[:260]
+    useful = [candidate for candidate in candidates if len(candidate[0]) >= 30] or candidates
+    selected, complete = max(useful, key=excerpt_score)
+    return selected.rstrip(" .!?…"), complete
+
+
+def _excerpt(profile: dict[str, Any], request: dict[str, Any]) -> str:
+    """Keep the text-only private helper available for catalog inspection."""
+    return _select_excerpt(profile, request)[0]
 
 
 def _money(amount: int) -> str:
@@ -160,7 +198,7 @@ def _money(amount: int) -> str:
 
 
 def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
-    excerpt = _excerpt(profile, request)
+    excerpt, complete = _select_excerpt(profile, request)
     details = [
         f"{profile['city']}, «{request['event_type']}»: цена от {_money(profile['price_from_kzt'])} ₸ в бюджете",
         f"в календаре на {request['event_date']} нет занятости",
@@ -172,7 +210,18 @@ def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
             details.append("присутствие по часам неприменимо")
         else:
             details.append(f"{request['duration_hours']:g} ч при лимите {profile['max_hours']} ч")
-    explanation = "; ".join(details) + f". Из описания: «{excerpt}»."
+    if complete and _description_evidence(excerpt)[1]:
+        evidence = f"Из описания: «{excerpt}»"
+    else:
+        # These are catalog capabilities, not preferences the user requested.
+        languages = ", ".join(profile["languages"])
+        presence = (
+            f"на площадке до {profile['max_hours']} ч"
+            if profile["max_hours"] is not None
+            else "работа не привязана к присутствию по часам"
+        )
+        evidence = f"В профиле: языки — {languages}; {presence}"
+    explanation = "; ".join(details) + f". {evidence}."
     return {
         "id": profile["id"],
         "name": profile["anon_name"],
