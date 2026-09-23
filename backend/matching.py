@@ -212,6 +212,14 @@ def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
             details.append(f"{request['duration_hours']:g} ч при лимите {profile['max_hours']} ч")
     if complete and _description_evidence(excerpt)[1]:
         evidence = f"Из описания: «{excerpt}»"
+        header = _BLOCK_HEADER.match(excerpt)
+        if header:
+            # Catalog price is a starting price, not the quoted lineup/package.
+            heading = header.group(0).casefold()
+            if re.search(r"\bсостав\b", heading):
+                evidence += "; стоимость этого состава нужно уточнить"
+            elif re.search(r"\bпакет\b", heading):
+                evidence += "; стоимость этого пакета нужно уточнить"
     else:
         # These are catalog capabilities, not preferences the user requested.
         languages = ", ".join(profile["languages"])
