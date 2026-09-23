@@ -419,7 +419,8 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       days.append(button);
     }
     dateCalendar.replaceChildren(heading, weekdays, days);
-    if (group) dateCalendar.append(el('p', 'field-hint', 'Под датой — свободные профили по каталогу, без учёта бюджета, языка и часов.'));
+    if (group) dateCalendar.append(el('p', 'field-hint', 'Число — свободные профили выбранной услуги; бюджет, язык и часы не учтены. Даты с 0 тоже можно выбрать.'));
+    if (group?.dates[fields.event_date.input.value]?.available === 0) dateCalendar.append(el('p', 'field-hint', 'Время бронирований в каталоге не указано.'));
     dateCalendar.append(calendarNote);
     refreshLanguage();
   }
