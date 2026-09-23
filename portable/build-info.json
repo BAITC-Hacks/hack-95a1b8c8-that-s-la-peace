@@ -84,5 +84,7 @@
     },
     "evidence_archive": "D:\\HackAI\\Thats La Peace team project\\.verification\\portable-build-20260923\\exe-smoke.f7a1980.json"
   },
-  "runtime_acceptance": "New build handed to integrator for a new EXE smoke; previous smoke applies to previous_verified_build only."
+  "runtime_acceptance": "PASS: final EXE from source559f7b7 verified in a clean folder and again from a fresh official GitHub clone of3c04ad5;20 real browser submissions and HTTP smoke each,health66,matching executableSHA256.",
+  "acceptance_report": "../docs/integration/20260923-portable.md",
+  "published_verification": "../docs/integration/evidence/20260923-published-jury-receipt.json"
 }

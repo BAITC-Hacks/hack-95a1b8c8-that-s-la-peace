@@ -1,0 +1,51 @@
+{
+  "status": "PASS",
+  "published_sha": "3c04ad5f3c0a1b89d2471c62c7472327e5a4a39e",
+  "runtime_sha": "559f7b7ec7fec7d7976be57c5f259152076489c2",
+  "exe_sha256": "5066586e1d48f3a8f5ddae4630a68f2377e0f75b19ea4c07ba35fe4e0cc3fe84",
+  "assets": [
+    {
+      "file": "index.html",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "styles.css",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "view.mjs",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "api.mjs",
+      "exact_bytes": false,
+      "content_identical": true
+    },
+    {
+      "file": "app.mjs",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "i18n.mjs",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "search-select.mjs",
+      "exact_bytes": true,
+      "content_identical": true
+    },
+    {
+      "file": "catalog-guide.json",
+      "exact_bytes": true,
+      "content_identical": true
+    }
+  ],
+  "browser_real_submissions": 20,
+  "http_smoke": "PASS",
+  "venv_in_clone": false
+}
