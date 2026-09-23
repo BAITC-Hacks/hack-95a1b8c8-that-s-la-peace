@@ -1,0 +1,400 @@
+{
+  "checked_at": "2026-09-23T12:18:27.627Z",
+  "base_url": "http://127.0.0.1:8017",
+  "browser": "153.0.4234.48",
+  "dataset_count": 66,
+  "dataset_version": "6a724b6b7dfb5973343e68ba18dadb60fc807d87e3d78f03ee86fb26cb089f7d",
+  "real_api_only": true,
+  "scenarios": [
+    {
+      "label": "dense category: October 15",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 6,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "elapsed_ms": 208
+    },
+    {
+      "label": "identical request preserves visible order",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 6,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "elapsed_ms": 130
+    },
+    {
+      "label": "October 16 changes visible top three",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 4,
+      "ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "elapsed_ms": 144
+    },
+    {
+      "label": "rare category: two Almaty florists",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 2,
+      "ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "elapsed_ms": 133
+    },
+    {
+      "label": "Astana florist is busy",
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "no_matches",
+      "eligible_count": 0,
+      "ids": [],
+      "elapsed_ms": 88
+    },
+    {
+      "label": "explicit date suggestion finds one florist",
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-14",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 1,
+      "ids": [
+        "HK-90002"
+      ],
+      "elapsed_ms": 256
+    },
+    {
+      "label": "category does not exist in city",
+      "request": {
+        "city": "Зарубежье",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "no_category_in_city",
+      "eligible_count": 0,
+      "ids": [],
+      "elapsed_ms": 77
+    },
+    {
+      "label": "budget of one tenge has no matches",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "no_matches",
+      "eligible_count": 0,
+      "ids": [],
+      "elapsed_ms": 79
+    },
+    {
+      "label": "explicit budget suggestion finds candidates",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 650000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 1,
+      "ids": [
+        "HK-44923"
+      ],
+      "elapsed_ms": 275
+    },
+    {
+      "label": "live bands show distinct source facts",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Лайв-бэнд",
+        "budget_kzt": 1500000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 3,
+      "ids": [
+        "HK-23752",
+        "HK-83709",
+        "HK-57480"
+      ],
+      "elapsed_ms": 181
+    },
+    {
+      "label": "B03 photographer has a source-backed individual approach",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Фотограф",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 4,
+      "ids": [
+        "HK-91112",
+        "HK-76268",
+        "HK-16628"
+      ],
+      "elapsed_ms": 104
+    },
+    {
+      "label": "B03 expanded ensemble is concise and price-qualified",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Лайв-бэнд",
+        "budget_kzt": 1500000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 4,
+      "ids": [
+        "HK-23752",
+        "HK-83709",
+        "HK-57480"
+      ],
+      "elapsed_ms": 167
+    },
+    {
+      "label": "B01 complete lineup and qualified starting price",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Лайв-бэнд",
+        "budget_kzt": 1150000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 4,
+      "ids": [
+        "HK-23752",
+        "HK-31819",
+        "HK-83709"
+      ],
+      "elapsed_ms": 137
+    },
+    {
+      "label": "B02 factual reason instead of advertising",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-17",
+        "event_type": "корпоратив",
+        "category": "Лайв-бэнд",
+        "budget_kzt": 1500000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 2,
+      "ids": [
+        "HK-57480",
+        "HK-25279"
+      ],
+      "elapsed_ms": 104
+    },
+    {
+      "label": "B03 florist duration copy keeps null-hour semantics",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": 24,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 2,
+      "ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "elapsed_ms": 126
+    },
+    {
+      "label": "venue calendar November 14",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-11-14",
+        "event_type": "корпоратив",
+        "category": "Банкетный зал",
+        "budget_kzt": 6000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 2,
+      "ids": [
+        "HK-90011",
+        "HK-64395"
+      ],
+      "elapsed_ms": 137
+    },
+    {
+      "label": "venue repeat preserves order",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-11-14",
+        "event_type": "корпоратив",
+        "category": "Банкетный зал",
+        "budget_kzt": 6000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 2,
+      "ids": [
+        "HK-90011",
+        "HK-64395"
+      ],
+      "elapsed_ms": 307
+    },
+    {
+      "label": "venue calendar November 15 excludes busy venue",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-11-15",
+        "event_type": "корпоратив",
+        "category": "Банкетный зал",
+        "budget_kzt": 6000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 4,
+      "ids": [
+        "HK-64395",
+        "HK-69010",
+        "HK-99701"
+      ],
+      "elapsed_ms": 110
+    },
+    {
+      "label": "real language and duration filters",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": 2,
+        "language": "русский"
+      },
+      "status": "matched",
+      "eligible_count": 6,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "elapsed_ms": 198
+    },
+    {
+      "label": "real request at mobile width 390",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "matched",
+      "eligible_count": 6,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "elapsed_ms": 160
+    }
+  ],
+  "mobile_dimensions": {
+    "viewport": 390,
+    "document": 390,
+    "body": 390
+  },
+  "browser_errors": [],
+  "external_requests": [],
+  "screenshots": [
+    "D:\\HackAI\\Thats La Peace team project\\.verification\\final-20260923-1712\\ours\\desktop-live.png",
+    "D:\\HackAI\\Thats La Peace team project\\.verification\\final-20260923-1712\\ours\\mobile-live.png"
+  ]
+}

@@ -1,0 +1,599 @@
+{
+  "scope": "two-SHA frontend/backend compatibility; not merged remote acceptance",
+  "fixtures": false,
+  "started_at": "2026-09-23T12:18:28.852Z",
+  "base_url": "http://127.0.0.1:8017/",
+  "declared_frontend_sha": "d48a3783d3d75502bfb118492963de6819baa3bc",
+  "declared_backend_sha": "c243f0b462519784a5c34629d8ff04f425b73c50",
+  "source_identity_note": "SHAs are supplied by the runner; HTTP alone cannot verify the serving process checkout.",
+  "checks": [
+    {
+      "name": "Real metadata and source dataset",
+      "status": "PASS"
+    },
+    {
+      "name": "D1 dense category",
+      "status": "PASS"
+    },
+    {
+      "name": "D1 repeat",
+      "status": "PASS"
+    },
+    {
+      "name": "Stable repeated ID order",
+      "status": "PASS"
+    },
+    {
+      "name": "D2 changed date",
+      "status": "PASS"
+    },
+    {
+      "name": "D1/D2 visible top-three changes",
+      "status": "PASS"
+    },
+    {
+      "name": "D3 rare category has two cards",
+      "status": "PASS"
+    },
+    {
+      "name": "D4 sole florist is booked",
+      "status": "PASS"
+    },
+    {
+      "name": "D4 busy exclusion",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit server date suggestion",
+      "status": "PASS"
+    },
+    {
+      "name": "D5 budget one tenge",
+      "status": "PASS"
+    },
+    {
+      "name": "D5 budget exclusions",
+      "status": "PASS"
+    },
+    {
+      "name": "Explicit server budget suggestion",
+      "status": "PASS"
+    },
+    {
+      "name": "D6 category absent in city",
+      "status": "PASS"
+    },
+    {
+      "name": "V1 venue calendar, two available",
+      "status": "PASS"
+    },
+    {
+      "name": "V2 venue calendar, four eligible",
+      "status": "PASS"
+    },
+    {
+      "name": "Venue IDs and visible change",
+      "status": "PASS"
+    },
+    {
+      "name": "Optional English and six hours",
+      "status": "PASS"
+    },
+    {
+      "name": "Duration excludes all hosts",
+      "status": "PASS"
+    },
+    {
+      "name": "Duration exclusion count",
+      "status": "PASS"
+    },
+    {
+      "name": "Null max_hours is not zero",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile 390px has no horizontal overflow",
+      "status": "PASS"
+    },
+    {
+      "name": "No browser runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "runs": [
+    {
+      "id": "D1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "visible_ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "total_in_city_category": 10,
+      "eligible_count": 6,
+      "exclusions": {
+        "busy": 2,
+        "budget": 2,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 226,
+      "within_10s_target": true
+    },
+    {
+      "id": "D1-repeat",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "visible_ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "total_in_city_category": 10,
+      "eligible_count": 6,
+      "exclusions": {
+        "busy": 2,
+        "budget": 2,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 306,
+      "within_10s_target": true
+    },
+    {
+      "id": "D2",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "visible_ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "total_in_city_category": 10,
+      "eligible_count": 4,
+      "exclusions": {
+        "busy": 5,
+        "budget": 2,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 174,
+      "within_10s_target": true
+    },
+    {
+      "id": "D3",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "visible_ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "total_in_city_category": 2,
+      "eligible_count": 2,
+      "exclusions": {
+        "busy": 0,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 202,
+      "within_10s_target": true
+    },
+    {
+      "id": "D4",
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "no_matches",
+      "api_ids": [],
+      "visible_ids": [],
+      "total_in_city_category": 1,
+      "eligible_count": 0,
+      "exclusions": {
+        "busy": 1,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [
+        "change_date"
+      ],
+      "elapsed_ms": 160,
+      "within_10s_target": true
+    },
+    {
+      "id": "S-date",
+      "request": {
+        "city": "Астана",
+        "event_date": "2026-10-14",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-90002"
+      ],
+      "visible_ids": [
+        "HK-90002"
+      ],
+      "total_in_city_category": 1,
+      "eligible_count": 1,
+      "exclusions": {
+        "busy": 0,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 336,
+      "within_10s_target": true
+    },
+    {
+      "id": "D5",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "no_matches",
+      "api_ids": [],
+      "visible_ids": [],
+      "total_in_city_category": 10,
+      "eligible_count": 0,
+      "exclusions": {
+        "busy": 2,
+        "budget": 10,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [
+        "increase_budget"
+      ],
+      "elapsed_ms": 193,
+      "within_10s_target": true
+    },
+    {
+      "id": "S-budget",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 650000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-44923"
+      ],
+      "visible_ids": [
+        "HK-44923"
+      ],
+      "total_in_city_category": 10,
+      "eligible_count": 1,
+      "exclusions": {
+        "busy": 2,
+        "budget": 8,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 211,
+      "within_10s_target": true
+    },
+    {
+      "id": "D6",
+      "request": {
+        "city": "Зарубежье",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "no_category_in_city",
+      "api_ids": [],
+      "visible_ids": [],
+      "total_in_city_category": 0,
+      "eligible_count": 0,
+      "exclusions": {
+        "busy": 0,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 162,
+      "within_10s_target": true
+    },
+    {
+      "id": "V1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-11-14",
+        "event_type": "корпоратив",
+        "category": "Банкетный зал",
+        "budget_kzt": 6000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-90011",
+        "HK-64395"
+      ],
+      "visible_ids": [
+        "HK-90011",
+        "HK-64395"
+      ],
+      "total_in_city_category": 7,
+      "eligible_count": 2,
+      "exclusions": {
+        "busy": 5,
+        "budget": 0,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 156,
+      "within_10s_target": true
+    },
+    {
+      "id": "V2",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-11-15",
+        "event_type": "корпоратив",
+        "category": "Банкетный зал",
+        "budget_kzt": 6000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-64395",
+        "HK-69010",
+        "HK-99701"
+      ],
+      "visible_ids": [
+        "HK-64395",
+        "HK-69010",
+        "HK-99701"
+      ],
+      "total_in_city_category": 7,
+      "eligible_count": 4,
+      "exclusions": {
+        "busy": 2,
+        "budget": 0,
+        "event_type": 1,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 151,
+      "within_10s_target": true
+    },
+    {
+      "id": "O-language-duration",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": 6,
+        "language": "английский"
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-44733",
+        "HK-35215"
+      ],
+      "visible_ids": [
+        "HK-44733",
+        "HK-35215"
+      ],
+      "total_in_city_category": 10,
+      "eligible_count": 2,
+      "exclusions": {
+        "busy": 2,
+        "budget": 2,
+        "event_type": 1,
+        "language": 7,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 161,
+      "within_10s_target": true
+    },
+    {
+      "id": "O-too-long",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": 13,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "no_matches",
+      "api_ids": [],
+      "visible_ids": [],
+      "total_in_city_category": 10,
+      "eligible_count": 0,
+      "exclusions": {
+        "busy": 2,
+        "budget": 2,
+        "event_type": 1,
+        "language": 0,
+        "duration": 10
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 123,
+      "within_10s_target": true
+    },
+    {
+      "id": "O-florist-no-hour-limit",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "свадьба",
+        "category": "Флорист",
+        "budget_kzt": 1000000,
+        "duration_hours": 24,
+        "language": null
+      },
+      "status": "PASS",
+      "http_status": 200,
+      "outcome": "matched",
+      "api_ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "visible_ids": [
+        "HK-90001",
+        "HK-39372"
+      ],
+      "total_in_city_category": 2,
+      "eligible_count": 2,
+      "exclusions": {
+        "busy": 0,
+        "budget": 0,
+        "event_type": 0,
+        "language": 0,
+        "duration": 0
+      },
+      "explanation_mode": "deterministic",
+      "suggestion_kinds": [],
+      "elapsed_ms": 182,
+      "within_10s_target": true
+    }
+  ],
+  "page_errors": [],
+  "browser": "153.0.4234.48",
+  "dataset_version": "6a724b6b7dfb5973343e68ba18dadb60fc807d87e3d78f03ee86fb26cb089f7d",
+  "posted_request_count": 14,
+  "completed_at": "2026-09-23T12:18:39.378Z",
+  "status": "PASS"
+}

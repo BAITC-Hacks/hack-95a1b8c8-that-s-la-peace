@@ -1,0 +1,38 @@
+{
+  "status": "PASS",
+  "verified_code_sha": "9be780001d993307d2daf09de1eb9a2363b87130",
+  "ilyas_sha": "d48a3783d3d75502bfb118492963de6819baa3bc",
+  "time": "2026-09-23T17:23:13.970643+05:00",
+  "backend_pytest": {
+    "passed": 231,
+    "seconds": 80.68,
+    "warnings": 1
+  },
+  "node_checks": 12,
+  "guide": "PASS",
+  "http_smoke_ms": 13.46,
+  "browser": {
+    "real_requests": 20,
+    "min_ms": 77,
+    "max_ms": 307
+  },
+  "ilyas_live": {
+    "checks": 23,
+    "real_requests": 14
+  },
+  "ux": {
+    "checks": 16,
+    "requests": 10,
+    "simulations": "delayed genuine response and reference-guide faults explicitly marked"
+  },
+  "network_checks": 5,
+  "fixture_browser": "PASS; synthetic responses, separate from real API",
+  "branding_cases": 9,
+  "clean_runtime_install": "PASS; new venv; no-cache requirements.txt; pip check; clean git",
+  "clean_browser": 20,
+  "clean_ux": 16,
+  "clean_network": 5,
+  "clean_restart": "PASS; full response identical",
+  "new_human_review": "NOT VERIFIED",
+  "platform_submission": "NOT VERIFIED"
+}

@@ -1,0 +1,391 @@
+{
+  "scope": "UX of the served candidate with real API; not proof of merged remote acceptance",
+  "started_at": "2026-09-23T12:20:03.454Z",
+  "base_url": "http://127.0.0.1:8019/",
+  "fixtures": false,
+  "declared_source_sha": "9be780001d993307d2daf09de1eb9a2363b87130",
+  "declared_backend_sha": "c243f0b462519784a5c34629d8ff04f425b73c50",
+  "source_note": "SHA values are supplied by the runner; HTTP alone does not identify the serving checkout.",
+  "checks": [
+    {
+      "name": "Catalog guide: city 50, group 9, date 7; no budget or request yet",
+      "status": "PASS",
+      "details": {
+        "city": 50,
+        "group": 9,
+        "available_before_budget": 7
+      }
+    },
+    {
+      "name": "Five fields trigger one debounced real request; budget separators normalize",
+      "status": "PASS",
+      "details": {
+        "request_delay_ms": 673,
+        "cards": 3
+      }
+    },
+    {
+      "name": "Search text and show-all do not submit or discard current results",
+      "status": "PASS"
+    },
+    {
+      "name": "Text date becomes ISO and automatically requests the new date",
+      "status": "PASS"
+    },
+    {
+      "name": "Compatible category/format subsets come from the guide; full catalog and current choices remain available",
+      "status": "PASS",
+      "details": {
+        "compatible_categories": 16,
+        "compatible_formats": 6,
+        "full_categories": 17
+      }
+    },
+    {
+      "name": "Unified service combobox retains all 17 canonical categories in optgroups",
+      "status": "PASS",
+      "details": {
+        "all": 17,
+        "groups": 5
+      }
+    },
+    {
+      "name": "RU → EN → KK → RU preserves canonical fields and Russian source explanations",
+      "status": "PASS"
+    },
+    {
+      "name": "One date input and one-month calendar cover all 100 allowed days",
+      "status": "PASS"
+    },
+    {
+      "name": "Manual impossible and out-of-coverage dates stay visible and never reach the API",
+      "status": "PASS"
+    },
+    {
+      "name": "Incomplete numeric hours do not submit or disappear; clearing restores automatic selection",
+      "status": "PASS"
+    },
+    {
+      "name": "Mobile 320/360/390px with an expanded calendar has no horizontal overflow",
+      "status": "PASS",
+      "details": [
+        {
+          "viewport": 320,
+          "document": 320,
+          "body": 320
+        },
+        {
+          "viewport": 360,
+          "document": 360,
+          "body": 360
+        },
+        {
+          "viewport": 390,
+          "document": 390,
+          "body": 390
+        }
+      ]
+    },
+    {
+      "name": "Reduced-motion preference disables animations and transitions",
+      "status": "PASS"
+    },
+    {
+      "name": "Late real response cannot overwrite a newer result (ordering simulation)",
+      "status": "PASS",
+      "details": {
+        "delayed_ids": [
+          "HK-44733",
+          "HK-44923",
+          "HK-77838"
+        ],
+        "retained_ids": [
+          "HK-44733",
+          "HK-88430",
+          "HK-44923"
+        ]
+      }
+    },
+    {
+      "name": "Optional reference fault (wrong-sha) hides guide and filters while real recommendations work",
+      "status": "PASS"
+    },
+    {
+      "name": "Optional reference fault (unavailable) hides guide and filters while real recommendations work",
+      "status": "PASS"
+    },
+    {
+      "name": "No page runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "runs": [
+    {
+      "id": "AUTO-D1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "request_to_visible_ms": 31
+    },
+    {
+      "id": "TEXT-D2",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 4,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "request_to_visible_ms": 19
+    },
+    {
+      "id": "GROUP-RESTORED",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 4,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "request_to_visible_ms": 17
+    },
+    {
+      "id": "CALENDAR-D1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "request_to_visible_ms": 14
+    },
+    {
+      "id": "AUTO-RESUME-D1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "request_to_visible_ms": 19
+    },
+    {
+      "id": "HOURS-CLEARED-D1",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "request_to_visible_ms": 20
+    },
+    {
+      "id": "STALE-NEWER-D2",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-16",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 4,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-88430",
+        "HK-44923"
+      ],
+      "request_to_visible_ms": 20
+    },
+    {
+      "id": "REFERENCE-wrong-sha",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "input_to_visible_ms": 836,
+      "simulation": "reference only; real recommendation response"
+    },
+    {
+      "id": "REFERENCE-unavailable",
+      "request": {
+        "city": "Алматы",
+        "event_date": "2026-10-15",
+        "event_type": "корпоратив",
+        "category": "Ведущий",
+        "budget_kzt": 1000000,
+        "duration_hours": null,
+        "language": null
+      },
+      "http_status": 200,
+      "eligible_count": 6,
+      "shown": 3,
+      "ids": [
+        "HK-44733",
+        "HK-44923",
+        "HK-77838"
+      ],
+      "input_to_visible_ms": 836,
+      "simulation": "reference only; real recommendation response"
+    }
+  ],
+  "page_errors": [],
+  "simulations": [
+    "Delay delivery of one genuine /api/recommendations response; response bytes and actual backend content remain unchanged.",
+    "Reference fault simulation: fetch the real catalog-guide.json and change only dataset_version to an intentionally mismatching SHA; recommendation traffic is untouched.",
+    "Reference fault simulation: abort only catalog-guide.json; recommendation traffic is untouched."
+  ],
+  "browser": "153.0.4234.48",
+  "calendar_navigation": [
+    {
+      "step": "opened",
+      "visible": true,
+      "month": "октябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "date-toggle"
+      }
+    },
+    {
+      "step": "previous to minimum",
+      "visible": true,
+      "month": "сентябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-day"
+      }
+    },
+    {
+      "step": "next month",
+      "visible": true,
+      "month": "октябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-nav"
+      }
+    },
+    {
+      "step": "next month",
+      "visible": true,
+      "month": "ноябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-nav"
+      }
+    },
+    {
+      "step": "next month",
+      "visible": true,
+      "month": "декабрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-day"
+      }
+    },
+    {
+      "step": "back to November",
+      "visible": true,
+      "month": "ноябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-nav"
+      }
+    },
+    {
+      "step": "back to October",
+      "visible": true,
+      "month": "октябрь 2026 г.",
+      "active": {
+        "tag": "BUTTON",
+        "class": "calendar-nav"
+      }
+    }
+  ],
+  "reference_fault_post_count": 2,
+  "posted_request_count": 10,
+  "status": "PASS",
+  "completed_at": "2026-09-23T12:20:14.990Z"
+}

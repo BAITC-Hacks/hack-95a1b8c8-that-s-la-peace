@@ -41,3 +41,7 @@ py -3.12 -m venv .venv
 Проверенный общий runtime/UI 62bd790; полный candidate e70b3be0d2cf64b9a8e6a826920a8ed540b7b79c включает безопасный personal checkpoint. 230 backend, 12 Node, HTTP smoke, наш browser 20 запросов, Ilyas 23 проверки / 14 запросов, UX 15 и network 5 — PASS. Новая venv без кеша, затем отдельный clone из официального GitHub exact e70b3be с установкой только requirements.txt, настоящий UI/API и повторный запуск — PASS. Windows/Python 3.12.10/Node 25.2.1/Edge 153.0.4234.48/Playwright 1.62.1. Одно прежнее предупреждение Starlette/httpx.
 
 Это техническая проверка агентами, не человеческая репетиция и не подтверждение подачи. Точные команды/процессы/сырые результаты/начальные неуспешные попытки — [integration/20260923-1620](integration/20260923-1620.md); сводка требований и границ — [FINAL_COMPLIANCE_REPORT](FINAL_COMPLIANCE_REPORT.md).
+
+## Финальная общая приёмка — 23.09.2026, 17:18–17:21
+
+Проверенный код 9be780001d993307d2daf09de1eb9a2363b87130 с готовым Ilyas d48a378: 231 backend (80.68 с), 12 Node, HTTP smoke, 20 наших browser-запросов, 23 проверки Ilyas /14 запросов, 16 UX /10 запросов, 5 network, fixture browser и 9 размеров/локалей шапки PASS. Чистый remote clone, новая venv без кеша только requirements.txt, pip check, browser20/UX16/network5 и restart с полным одинаковым JSON PASS. Одно прежнее предупреждение Starlette/httpx. [Точные версии и границы](integration/20260923-final.md). Новая человеческая приёмка/форма NOT VERIFIED.

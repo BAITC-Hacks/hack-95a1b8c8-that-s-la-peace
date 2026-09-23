@@ -1,0 +1,85 @@
+{
+  "status": "PASS",
+  "sha": "9be780001d993307d2daf09de1eb9a2363b87130",
+  "time": "2026-09-23T17:19:55.360467+05:00",
+  "port": 8019,
+  "checks": [
+    {
+      "path": "/.env",
+      "status": 404
+    },
+    {
+      "path": "/.git/config",
+      "status": 404
+    },
+    {
+      "path": "/README.md",
+      "status": 404
+    },
+    {
+      "path": "/AGENTS.md",
+      "status": 404
+    },
+    {
+      "path": "/frontend/serve.mjs",
+      "status": 404
+    },
+    {
+      "path": "/integration-test.patch",
+      "status": 404
+    },
+    {
+      "path": "/",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/styles.css",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/view.mjs",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/api.mjs",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/app.mjs",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/i18n.mjs",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/search-select.mjs",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "path": "/catalog-guide.json",
+      "status": 200,
+      "csp": true
+    },
+    {
+      "request": "oversized",
+      "chunked": false,
+      "status": 413
+    },
+    {
+      "request": "oversized",
+      "chunked": true,
+      "status": 413
+    }
+  ],
+  "api_title": "Умный подбор подрядчиков",
+  "normal_request_after_oversized": 200,
+  "docs_csp_exemption": true
+}
