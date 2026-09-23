@@ -18,6 +18,9 @@ const files = new Map([
   ['/view.mjs', ['view.mjs', 'text/javascript; charset=utf-8']],
   ['/api.mjs', ['api.mjs', 'text/javascript; charset=utf-8']],
   ['/app.mjs', ['app.mjs', 'text/javascript; charset=utf-8']],
+  ['/search-select.mjs', ['search-select.mjs', 'text/javascript; charset=utf-8']],
+  ['/i18n.mjs', ['i18n.mjs', 'text/javascript; charset=utf-8']],
+  ['/catalog-guide.json', ['catalog-guide.json', 'application/json; charset=utf-8']],
 ]);
 function json(res, status, data) {
   res.writeHead(status, {'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store'});

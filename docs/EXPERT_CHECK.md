@@ -1,5 +1,104 @@
 # Независимая приёмка объединённой версии
 
+## Чистая проверка опубликованной dev-zoro 6039476 — 16:00–16:04 UTC+05:00
+
+Точный SHA: `603947667aa8ecd93f9a6f30f0ba339f79877274`, получен из официального
+remote в новую папку acceptance/ui-6039476. Это готовая часть Ilyas с backend
+df8ed9f; более новые исправления объяснений cfdf9c5 сюда ещё не включены.
+Новая venv, Python 3.12.14, Windows AMD64, Node 24.19.0 и Edge 153.0.4234.48.
+Runtime установлен по README через pip --no-cache-dir, без .env, аккаунтов,
+переноса пакетов или личных cookies. Playwright 1.62.1 — внешний инструмент
+приёмки, приложению не требуется. Initial sandbox ensurepip завершился ошибкой;
+обычный разрешённый запуск той же команды успешно создал окружение.
+
+```powershell
+git clone --branch dev-zoro --single-branch https://github.com/BAITC-Hacks/hack-95a1b8c8-that-s-la-peace.git ui-6039476
+Set-Location ui-6039476
+git rev-parse HEAD
+& 'C:\Users\Kazy\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe' -m venv .venv
+.\.venv\Scripts\python.exe -m pip install --no-cache-dir -r requirements.txt
+.\.venv\Scripts\python.exe -m pip check
+.\.venv\Scripts\python.exe frontend/generate-guide.py --check
+.\.venv\Scripts\python.exe run.py --port 8013
+# Второй терминал, с PLAYWRIGHT_MODULE и UI_CHECK_OUTPUT по frontend/README:
+.\.venv\Scripts\python.exe scripts/smoke.py --base-url http://127.0.0.1:8013
+node tests/ui/live-check.cjs http://127.0.0.1:8013
+node tests/ui/ux-check.cjs http://127.0.0.1:8013
+```
+
+| Проверка | Фактический результат |
+| --- | --- |
+| SHA / чистый checkout | PASS: 6039476, git status пуст; runtime/CSV не правились |
+| Установка / pip check | PASS, фиксированные production-зависимости без конфликтов |
+| Агрегаты после Windows checkout | PASS: SHA CSV, 66 профилей, 112 групп × 100 дат, 759456 байт |
+| Live browser 16:02:55–16:03:01 | PASS: 23 проверки, 14 настоящих запросов, без JS-ошибок |
+| UX browser 16:02:55–16:03:08 | PASS: 15 проверок, 10 запросов; симуляции порядка ответа/сбоя справки явно отмечены |
+| HTTP smoke | PASS: 6/4/2 подходящих, два пустых исхода, повторяемость, оба применимых совета |
+| Остановка / повторный запуск | PASS: Ctrl+C завершил PID 14756; та же команда запустила PID 21188; повторный smoke PASS |
+| Следующая общая main / финальная форма | NOT VERIFIED: Din объединяет новый UI с cfdf9c5 и проверяет новый candidate; форму отправляет Ilyas |
+
+Сырые протоколы: [live-clean-6039476.json](../tests/ui/evidence/live-clean-6039476.json)
+и [ux-clean-6039476.json](../tests/ui/evidence/ux-clean-6039476.json). Стандартное
+поле scope скриптов само по себе не подтверждает чистый запуск; checkout,
+окружение и процесс установлены командами выше. Обе declared-версии равны
+полному 6039476. Последующее дополнение этих документов не меняет runtime.
+
+## Последний UX-пакет — срез 23.09.2026, 15:55 UTC+05:00
+
+После прямого разрешения Ilyas включена одна строка PUBLIC_FRONTEND_FILES:
+i18n.mjs, search-select.mjs, catalog-guide.json. Проверен новый процесс PID 3904
+на 8007: merge 58e63f18054fe1c08a846f464605537c30ce143a (UX abbf1bfb + общий
+df8ed9f) плюс эта строка. UX 15/15, 10 запросов, 15:55:07–19; live 23/23,
+14 запросов, 15:55:09–14; scripts/smoke.py с обоими советами — PASS.
+Публичные три файла HTTP 200; generate-guide.py, AGENTS.md, public-assets.patch
+и .env — 404. Сырой UX-протокол сохранён без переименования проверенного SHA:
+[ux-merged-20260923-1555.json](../tests/ui/evidence/ux-merged-20260923-1555.json).
+Зависимости взяты из ранее чисто установленной venv; это затронутая приёмка
+своей ветки, не новая чистая установка общей main. Ниже сохранён предыдущий прогон.
+
+### Предыдущий прогон 15:48
+
+Ilyas запросил 14 улучшений интерфейса. Реализация и ограничения перечислены
+в frontend/README и собственном handoff. Проверялась рабочая копия на базе
+9be1df2 с новым frontend; Python-процесс 8007 по-прежнему использует backend
+1162d459. Новые зависимости/данные сервера не добавлялись. Это проверка своей
+части, не чистая приёмка будущей общей версии.
+
+| Проверка | Фактический результат |
+| --- | --- |
+| Основной live-check, 15:48:28–33 | PASS: 23 проверки / 14 настоящих запросов, три исхода, календарь, optional-поля, советы; без JS-ошибок |
+| UX-check, 15:48:26–38 | PASS: 15 проверок, поиск/полный список, цены и количества по CSV, автоподбор, дата/бюджет, RU/KK/EN, сохранение ввода, группы категорий, совместимость, календарь, late response, reduced-motion |
+| Мобильные 360/390 px | PASS с раскрытым календарём: document/body равны ширине viewport после устранения overflow |
+| RU/EN desktop 1440 и mobile 390 | PASS в просмотренных снимках, три карточки читаются; замечаний контраста в проверенном состоянии не найдено |
+| Guide generator --check | PASS: исходный SHA, 66 уникальных профилей, города 50/15/1, 112 групп × 100 дат, прямой контроль D1, стабильность результата |
+| API/HTTP/components/fixtures | PASS: 9/9 API, 2/2 HTTP, native-search component, полная fixture-регрессия; fixture-ответы не засчитываются как настоящий подбор |
+| Network recovery после UX-правок | PASS 15:35:59–15:36:01, 5 проверок, offline только в отдельном browser context |
+| Ресурсы backend и новый процесс | PASS в повторе 15:55, описанном выше; включение в следующую общую main проверяется отдельно |
+
+Тесты запускаются из корня репозитория; PLAYWRIGHT_MODULE указывает установленный
+Playwright 1.62.1, Edge 153.0.4234.48. UI_CHECK_OUTPUT задаёт каталог безопасного
+протокола, UI_SOURCE_SHA/FRONTEND_SHA/BACKEND_SHA явно описывают рабочую версию.
+
+```powershell
+node tests/ui/api.test.mjs
+node tests/ui/server.test.mjs
+node tests/ui/search-select.test.cjs
+node tests/ui/browser-check.cjs http://127.0.0.1:8007
+node tests/ui/live-check.cjs http://127.0.0.1:8007
+node tests/ui/ux-check.cjs http://127.0.0.1:8007
+node tests/ui/network-recovery.cjs http://127.0.0.1:8007
+.\.venv\Scripts\python.exe frontend/generate-guide.py --check
+```
+
+В данном workspace генератор выполнен Python из acceptance/integration-1162d45/.venv;
+это тот же стандартный Python, дополнительных библиотек генератору не требуется.
+Сырой протокол UX: `tests/ui/evidence/ux-working-20260923-1548.json`.
+Он честно указывает рабочие изменения, не подменён будущим commit SHA.
+Задержка доставки настоящего ответа и повреждение SHA/отказ только справочника
+явно помечены как симуляции; ответы подбора при этом действительно получены от API.
+Человеческая оценка KK/EN носителем языка не выполнена; оригинальные объяснения
+не переведены и не сочинены клиентом. Финальная платформа не подавалась.
+
 Состояние 23.09.2026, 14:44 UTC+05:00: чистая установка и основной сценарий
 объединённого опубликованного SHA `1162d4595f8641bc60b0d40c9aad5a4dea74a87c`
 проверены агентом Ilyas — **PASS**. Новая папка, новая venv, один процесс по README,
@@ -12,7 +111,7 @@
 
 Документ фиксирует порядок будущей проверки и её реальные результаты. Общая матрица требований ведётся отдельно, здесь её копия не создаётся. Основание: главная инструкция, редакция 3, разделы 7–10; ТЗ #79-lite, «Требования» и Definition of Done; стартовые инструкции Ilyas о проверке после интеграции.
 
-**Актуальные протоколы — «Чистая приёмка 1162d459» и «Проверки UI 6f38144».**
+**Актуальный протокол своей части — «Чистая проверка опубликованной dev-zoro 6039476» выше.**
 Таблицы и записи ниже до чистой приёмки сохраняют исторический срез 14:08,
 до публикации общей версии. Их NOT VERIFIED не означает, что описанная далее
 проверка не состоялась. Новые изменения UI ещё ожидают общей интеграции.

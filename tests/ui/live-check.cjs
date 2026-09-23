@@ -54,15 +54,15 @@ function endpoint(url, pathname) {
   }
 
   async function formValues() {
-    return page.locator('[name]').evaluateAll(nodes => Object.fromEntries(nodes.filter(node => ['INPUT', 'SELECT'].includes(node.tagName)).map(node => [node.name, node.value])));
+    return page.locator('[name]').evaluateAll(nodes => Object.fromEntries(nodes.filter(node => ['INPUT', 'SELECT'].includes(node.tagName)).map(node => [node.name, node.name === 'budget_kzt' ? node.value.replace(/\s/g, '') : node.value])));
   }
 
   async function fillForm(request) {
     const before = posted.length;
     await page.getByLabel('Город', {exact: true}).selectOption(request.city);
     await page.getByLabel('Дата события').fill(request.event_date);
-    await page.getByLabel('Формат мероприятия').selectOption(request.event_type);
-    await page.getByLabel('Кого или что ищем').selectOption(request.category);
+    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption(request.event_type);
+    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption(request.category);
     await page.getByLabel('Бюджет, ₸').fill(String(request.budget_kzt));
     const optional = page.locator('details.optional-fields');
     if (await optional.getAttribute('open') === null) await optional.locator('summary').click();
@@ -165,6 +165,9 @@ function endpoint(url, pathname) {
     assert.equal(meta.dataset_count, 66, 'This test baseline requires 66 profiles.');
     report.dataset_version = meta.dataset_version;
     await page.locator('[data-state="idle"]').waitFor();
+    await page.locator('.auto-toggle input').uncheck();
+    await page.locator('.compatibility-toggle').waitFor({state: 'visible'});
+    await page.locator('.compatibility-toggle input').uncheck(); // Exercise the complete catalog, including the absent city/category outcome.
     report.checks.push({name: 'Real metadata and source dataset', status: 'PASS'});
 
     const d1 = await check('D1 dense category', () => run('D1', {...baseRequest}, {status: 'matched', total: 10, eligible: 6}));

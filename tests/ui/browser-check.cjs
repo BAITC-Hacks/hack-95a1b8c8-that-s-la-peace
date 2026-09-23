@@ -54,17 +54,18 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
   try {
     await page.goto(baseUrl);
     await state('idle');
+    await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
     assert.equal(await page.locator('[name=event_date]').getAttribute('min'), '2026-09-23');
     assert.equal(await page.locator('[name=event_date]').getAttribute('max'), '2026-12-31');
     await submit('invalid');
     assert.equal(requests.length, 0);
-    assert.equal(await page.locator('[aria-invalid=true]').count(), 5);
+    assert.equal(await page.locator('.field-error:visible').count(), 5, 'Five logical required fields; the date has two synchronized inputs.');
     console.log('PASS required fields and calendar bounds');
 
     await page.getByLabel('Город', {exact: true}).selectOption('Алматы');
     await page.getByLabel('Дата события').fill('2026-10-15');
-    await page.getByLabel('Формат мероприятия').selectOption('корпоратив');
-    await page.getByLabel('Кого или что ищем').selectOption('Ведущий');
+    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption('корпоратив');
+    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption('Ведущий');
     await page.getByLabel('Бюджет, ₸').fill('1000000');
     holdResponse = true;
     await page.getByRole('button', {name: 'Подобрать варианты'}).click();
@@ -84,7 +85,7 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     if (output) {fs.mkdirSync(output, {recursive: true}); await page.screenshot({path: path.join(output, 'desktop-fixtures.png'), fullPage: true});}
     mode = 'one'; await submit('matched'); assert.equal(await page.locator('[data-profile-id]').count(), 1);
     mode = 'three'; await submit('matched'); assert.equal(await page.locator('[data-profile-id]').count(), 3);
-    console.log('PASS loading disables form; one, two and three cards');
+    console.log('PASS loading prevents duplicate submit; one, two and three cards');
 
     await page.getByLabel('Дата события').fill('2026-10-16');
     await state('edited');
@@ -94,10 +95,10 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
 
     mode = 'validation'; await submit('invalid');
     assert.equal(await page.locator('[name=language]').getAttribute('aria-invalid'), 'true');
-    assert.equal(await page.locator('details').getAttribute('open'), '');
+    assert.equal(await page.locator('details.optional-fields').getAttribute('open'), '');
     mode = 'unavailable'; await submit('error');
     assert.equal((await page.locator('body').innerText()).includes('internal detail'), false);
-    assert.equal(await page.getByLabel('Бюджет, ₸').inputValue(), '1000000');
+    assert.equal(await page.getByLabel('Бюджет, ₸').inputValue(), '1 000 000');
     mode = 'matched'; await page.getByRole('button', {name: 'Попробовать ещё раз'}).click(); await state('matched');
     mode = 'malformed'; await submit('error');
     assert.equal(await page.locator('[data-profile-id]').count(), 0);
@@ -141,7 +142,7 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
       await page.locator(`button[data-suggestion-kind="${kind}"]`).click(); await state('matched');
       assert.equal(requests.length, beforeClick + 1);
       assert.equal(requests.at(-1).event_date, kind === 'change_date' ? '2026-10-20' : oldDate);
-      assert.equal(requests.at(-1).budget_kzt, Number(oldBudget) + (kind === 'increase_budget' ? 50000 : 0));
+      assert.equal(requests.at(-1).budget_kzt, Number(oldBudget.replace(/\s/g, '')) + (kind === 'increase_budget' ? 50000 : 0));
       assert.equal(requests.at(-1).duration_hours, 2);
       assert.equal(requests.at(-1).language, 'русский');
     }
@@ -156,6 +157,7 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     assert.equal(await page.getByRole('button', {name: 'Подобрать варианты'}).isDisabled(), true);
     metaUnavailable = false;
     await page.getByRole('button', {name: 'Попробовать ещё раз'}).click(); await state('idle');
+    await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
     assert.deepEqual(errors, []);
     console.log('PASS metadata failure/recovery and no browser exceptions');
   } finally {await browser.close();}

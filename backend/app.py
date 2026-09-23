@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 # Repository instructions, preview servers and configuration are never assets.
 PUBLIC_FRONTEND_FILES = frozenset({
     "index.html", "styles.css", "view.mjs", "api.mjs", "app.mjs",
+    "i18n.mjs", "search-select.mjs", "catalog-guide.json",
 })
 
 
