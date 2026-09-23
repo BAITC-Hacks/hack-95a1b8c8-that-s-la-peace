@@ -329,6 +329,9 @@ def test_real_ensemble_excerpt_keeps_one_complete_package(catalog, query):
     assert excerpt.endswith("звукорежиссёр")
     assert "Расширенный состав" not in excerpt and "Репертуар:" not in excerpt
     assert excerpt in source["description"] and len(excerpt) <= 260
+    assert "стоимость этого состава нужно уточнить" in card["explanation"]
+    assert "стоимость" not in excerpt
+    assert card["explanation"].count(".") == 2
 
 
 def test_package_boundaries_do_not_depend_on_profile_id_or_band_name(write_catalog, query):
@@ -393,3 +396,20 @@ def test_truncated_source_with_late_qualification_is_not_a_reason(write_catalog,
     assert "Из описания:" not in card["explanation"]
     assert "В профиле:" in card["explanation"]
     assert "Саксофон" not in card["explanation"]
+
+
+@pytest.mark.parametrize("description,qualification", [
+    ("Пакет Премиум: мгновенная печать снимков и брендированные фоторамки.", "стоимость этого пакета нужно уточнить"),
+    ("Репертуар: песни на скрипке и саксофоне для камерных встреч.", None),
+    ("Языки работы: русский, английский для ведения мероприятий.", None),
+])
+def test_package_price_qualification_is_separate_from_source(write_catalog, query, description, qualification):
+    loaded = load_catalog(write_catalog([{"description": description}]))
+    card = recommend(loaded, query)["cards"][0]
+    assert card["description_excerpt"] == description.rstrip(".")
+    if qualification:
+        assert qualification in card["explanation"]
+        assert qualification not in card["description_excerpt"]
+    else:
+        assert "стоимость этого" not in card["explanation"]
+    assert card["explanation"].count(".") == 2
