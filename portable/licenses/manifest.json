@@ -1,0 +1,414 @@
+{
+  "collected_utc": "2026-09-23T12:39:16+00:00",
+  "python": {
+    "version": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "architecture": "AMD64",
+    "license": "PSF and bundled third-party notices",
+    "license_sha256": "e502c6b880ff58d614901495a9009c136539cd0b1e2a2abb8fc00b934c203419"
+  },
+  "distributions": [
+    {
+      "name": "altgraph",
+      "version": "0.17.5",
+      "role": "build-tool-only",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "altgraph-0.17.5/altgraph-0.17.5.dist-info/LICENSE",
+          "sha256": "6c194d6db0c64d45535d10c95142b9b0cda7b7dcc7f1ddee302b3d536f3dbe46",
+          "bytes": 1002
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "annotated-doc-0.0.5/annotated_doc-0.0.5.dist-info/licenses/LICENSE",
+          "sha256": "fff170779a6acbf65abdb405c087f1cee1786691e4a96a4034517e4a504a0cdf",
+          "bytes": 1086
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "annotated-types-0.8.0/annotated_types-0.8.0.dist-info/licenses/LICENSE",
+          "sha256": "fe1049884b1a0d9342901e88e07f32925d24b3121d9972b6a6805fb9824b095d",
+          "bytes": 1083
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "anyio-4.15.1/anyio-4.15.1.dist-info/licenses/LICENSE",
+          "sha256": "5361ac9dc58f2ef5fd2e9b09c68297c17f04950909bbc8023bdb82eacf22c2b0",
+          "bytes": 1081
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "click",
+      "version": "8.5.0",
+      "role": "application-runtime",
+      "license_metadata": "BSD-3-Clause",
+      "full_license_files": [
+        {
+          "file": "click-8.5.0/click-8.5.0.dist-info/licenses/LICENSE.txt",
+          "sha256": "9a8ad106a394e853bfe21f42f4e72d592819a22805d991b5f3275029292b658d",
+          "bytes": 1475
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "role": "application-runtime",
+      "license_metadata": "License :: OSI Approved :: BSD License",
+      "full_license_files": [
+        {
+          "file": "colorama-0.4.6/colorama-0.4.6.dist-info/licenses/LICENSE.txt",
+          "sha256": "cac35c02686e5d04a5a7140bfb3b36e73aed496656e891102e428886d7930318",
+          "bytes": 1491
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "fastapi",
+      "version": "0.141.1",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "fastapi-0.141.1/fastapi-0.141.1.dist-info/licenses/LICENSE",
+          "sha256": "4ec89ffc81485b97fec584b2d4a961032eeffe834453894fd9c1274906cc744e",
+          "bytes": 1086
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "h11-0.16.0/h11-0.16.0.dist-info/licenses/LICENSE.txt",
+          "sha256": "37db5bb85926db28a427a25867f10b1232003aea1be69ccb851138adb8e6f361",
+          "bytes": 1124
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "idna",
+      "version": "3.20",
+      "role": "application-runtime",
+      "license_metadata": "BSD-3-Clause",
+      "full_license_files": [
+        {
+          "file": "idna-3.20/idna-3.20.dist-info/licenses/LICENSE.md",
+          "sha256": "1a9a4f0e3d479a27240ddd59a9137a66ab4a0f9dfdc8ca6188cc0bfd85187f04",
+          "bytes": 1541
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "packaging",
+      "version": "26.3",
+      "role": "build-tool-only",
+      "license_metadata": "Apache-2.0 OR BSD-2-Clause",
+      "full_license_files": [
+        {
+          "file": "packaging-26.3/packaging-26.3.dist-info/licenses/LICENSE",
+          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+          "bytes": 197
+        },
+        {
+          "file": "packaging-26.3/packaging-26.3.dist-info/licenses/LICENSE.APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "bytes": 10174
+        },
+        {
+          "file": "packaging-26.3/packaging-26.3.dist-info/licenses/LICENSE.BSD",
+          "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5",
+          "bytes": 1344
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pefile",
+      "version": "2024.8.26",
+      "role": "build-tool-only",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "pefile-2024.8.26/pefile-2024.8.26.dist-info/LICENSE",
+          "sha256": "b44409c067c6da52bfb54bb6624fb11a7b52157c3a13ae1400232f8196e86ad3",
+          "bytes": 1083
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pip",
+      "version": "25.0.1",
+      "role": "build-tool-only",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "pip-25.0.1/pip-25.0.1.dist-info/AUTHORS.txt",
+          "sha256": "1eace90552df4f5941b61a907e20e555e16483ae6127b650bef5a1a2af8102c0",
+          "bytes": 11018
+        },
+        {
+          "file": "pip-25.0.1/pip-25.0.1.dist-info/LICENSE.txt",
+          "sha256": "634300a669d49aeae65b12c6c48c924c51a4cdf3d1ff086dc3456dc8bcaa2104",
+          "bytes": 1093
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.5",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "pydantic-2.13.5/pydantic-2.13.5.dist-info/licenses/LICENSE",
+          "sha256": "a9e186f3ca16b5eef84318e7a701721351a00cb7b8ae3a4394b67b49e3529ef3",
+          "bytes": 1129
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pydantic_core",
+      "version": "2.46.5",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "pydantic_core-2.46.5/pydantic_core-2.46.5.dist-info/licenses/LICENSE",
+          "sha256": "fbe7f615f18d135c07000e5a86325db27f42c7729699ef166ac1f7a3f4586bf4",
+          "bytes": 1101
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pyinstaller",
+      "version": "6.22.3",
+      "role": "build-tool-only",
+      "license_metadata": "GPLv2-or-later with a special exception which allows to use PyInstaller to build and distribute non-free programs (including commercial ones)",
+      "full_license_files": [
+        {
+          "file": "pyinstaller-6.22.3/pyinstaller-6.22.3.dist-info/licenses/COPYING.txt",
+          "sha256": "0598064c7d2718e38d7914a7d08343b2fa008e3bea9ebba2aa7a6ffa5900dd64",
+          "bytes": 32604
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pyinstaller-hooks-contrib",
+      "version": "2026.7",
+      "role": "build-tool-only",
+      "license_metadata": "License :: OSI Approved :: Apache Software License; License :: OSI Approved :: GNU General Public License v2 (GPLv2)",
+      "full_license_files": [
+        {
+          "file": "pyinstaller-hooks-contrib-2026.7/pyinstaller_hooks_contrib-2026.7.dist-info/licenses/LICENSE",
+          "sha256": "91d0baaff00773038e72c0a1fc9d5d2d38706b7a2b9c04f34296608f931b9cd0",
+          "bytes": 27666
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "pywin32-ctypes",
+      "version": "0.2.3",
+      "role": "build-tool-only",
+      "license_metadata": "BSD-3-Clause",
+      "full_license_files": [
+        {
+          "file": "pywin32-ctypes-0.2.3/pywin32_ctypes-0.2.3.dist-info/LICENSE.txt",
+          "sha256": "dfa83b3e2709adfcdb838d9ad55823ca674abb780e60563d9dd9544ccbf785e9",
+          "bytes": 1644
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "setuptools",
+      "version": "84.0.0",
+      "role": "build-tool-only",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "setuptools-84.0.0/setuptools-84.0.0.dist-info/licenses/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/autocommand-2.2.2.dist-info/LICENSE",
+          "sha256": "ade78d04982d69972d444a8e14a94f87a2334dd3855cc80348ea8e240aa0df2d",
+          "bytes": 7634
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/backports.tarfile-1.2.0.dist-info/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/importlib_metadata-8.7.1.dist-info/licenses/LICENSE",
+          "sha256": "458502e12d97bbf64438606a20044aa85eb05fb0a8a807bb35dbec253fd1fc04",
+          "bytes": 10278
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/jaraco.text-4.0.0.dist-info/LICENSE",
+          "sha256": "86da0f01aeae46348a3c3d465195dc1ceccde79f79e87769a64b8da04b2a4741",
+          "bytes": 1023
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/jaraco_context-6.1.0.dist-info/licenses/LICENSE",
+          "sha256": "9755a18519666e5f0f4cae3daad3d7012bcae48a600b31237d75e9fe134e6683",
+          "bytes": 1076
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/jaraco_functools-4.4.0.dist-info/licenses/LICENSE",
+          "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+          "bytes": 1076
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/more_itertools-10.8.0.dist-info/licenses/LICENSE",
+          "sha256": "09f1c8c9e941af3e584d59641ea9b87d83c0cb0fd007eb5ef391a7e2643c1a46",
+          "bytes": 1053
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE",
+          "sha256": "cad1ef5bd340d73e074ba614d26f7deaca5c7940c3d8c34852e65c4909686c48",
+          "bytes": 197
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.APACHE",
+          "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594",
+          "bytes": 10174
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/packaging-26.0.dist-info/licenses/LICENSE.BSD",
+          "sha256": "b70e7e9b742f1cc6f948b34c16aa39ffece94196364bc88ff0d2180f0028fac5",
+          "bytes": 1344
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/platformdirs-4.4.0.dist-info/licenses/LICENSE",
+          "sha256": "29e0fd62e929850e86eb28c3fdccf0cefdf4fa94879011cffb3d0d4bed6d4db6",
+          "bytes": 1089
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/tomli-2.4.0.dist-info/licenses/LICENSE",
+          "sha256": "b80816b0d530b8accb4c2211783790984a6e3b61922c2b5ee92f3372ab2742fe",
+          "bytes": 1072
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/wheel-0.46.3.dist-info/licenses/LICENSE.txt",
+          "sha256": "30c23618679108f3e8ea1d2a658c7ca417bdfc891c98ef1a89fa4ff0c9828654",
+          "bytes": 1107
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/_vendor/zipp-3.23.0.dist-info/licenses/LICENSE",
+          "sha256": "5a57cb4db85e2a2dd88c290628908add57e3451449e0a9a71fdfb38776fd759d",
+          "bytes": 1076
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/config/NOTICE",
+          "sha256": "2dddf08818297a3b89d43d95ff659d8da85741108c9136dfa3a4d856c0623bd8",
+          "bytes": 493
+        },
+        {
+          "file": "setuptools-84.0.0/setuptools/config/_validate_pyproject/NOTICE",
+          "sha256": "09c9bcea95ca086f8bc5bed174e40bc835b297d40fb5f86bbbb570fe0a5581a7",
+          "bytes": 18737
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "starlette",
+      "version": "1.7.0",
+      "role": "application-runtime",
+      "license_metadata": "BSD-3-Clause",
+      "full_license_files": [
+        {
+          "file": "starlette-1.7.0/starlette-1.7.0.dist-info/licenses/LICENSE.md",
+          "sha256": "dcb95677a02240243187e964f941847d19b17821cf99e5afae684fab328c19bf",
+          "bytes": 1518
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4",
+      "role": "application-runtime",
+      "license_metadata": "MIT",
+      "full_license_files": [
+        {
+          "file": "typing-inspection-0.4.4/typing_inspection-0.4.4.dist-info/licenses/LICENSE",
+          "sha256": "804b59b25f2c31bd278f9202a19ae49a3945aa2664387e2d0a128c7cacc61ec3",
+          "bytes": 1090
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "role": "application-runtime",
+      "license_metadata": "PSF-2.0",
+      "full_license_files": [
+        {
+          "file": "typing_extensions-4.16.0/typing_extensions-4.16.0.dist-info/licenses/LICENSE",
+          "sha256": "3b2f81fe21d181c499c59a256c8e1968455d6689d269aa85373bfb6af41da3bf",
+          "bytes": 13936
+        }
+      ],
+      "metadata_included": true
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.53.0",
+      "role": "application-runtime",
+      "license_metadata": "BSD-3-Clause",
+      "full_license_files": [
+        {
+          "file": "uvicorn-0.53.0/uvicorn-0.53.0.dist-info/licenses/LICENSE.md",
+          "sha256": "efe1acf3e62fb99c288b0ec73e5a773b7268ef4320fe757ea994214e4b63c371",
+          "bytes": 1526
+        }
+      ],
+      "metadata_included": true
+    }
+  ]
+}

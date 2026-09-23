@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "complete_decoded_json_identical": true,
+  "initial_tree_stopped": 12888,
+  "source_files": false,
+  "python_path": "absent",
+  "base_url": "http://127.0.0.1:8021",
+  "failed_harness_attempt": {
+    "reason": "Python subprocess quoted cmd /c differently; cmd exited before product launch",
+    "wait_ms": 62906,
+    "exited_cmd_pid": 27676
+  },
+  "health": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "restart_pid": 26412,
+  "startup_ms": 1809
+}

@@ -45,3 +45,7 @@ py -3.12 -m venv .venv
 ## Финальная общая приёмка — 23.09.2026, 17:18–17:21
 
 Проверенный код 9be780001d993307d2daf09de1eb9a2363b87130 с готовым Ilyas d48a378: 231 backend (80.68 с), 12 Node, HTTP smoke, 20 наших browser-запросов, 23 проверки Ilyas /14 запросов, 16 UX /10 запросов, 5 network, fixture browser и 9 размеров/локалей шапки PASS. Чистый remote clone, новая venv без кеша только requirements.txt, pip check, browser20/UX16/network5 и restart с полным одинаковым JSON PASS. Одно прежнее предупреждение Starlette/httpx. [Точные версии и границы](integration/20260923-final.md). Новая человеческая приёмка/форма NOT VERIFIED.
+
+## Дополнение по новому поручению — 17:46
+
+Название возвращено на **That's La Peace**. Добавлен автономный Windows x64 пакет и START.cmd. Проверенный runtime **f7a1980cf47dc77f2bb13115d974b0e00b3cc35f**: 260 pytest, 11 Node + combobox, 20 live, 16 UX, 5 network, 9 branding — PASS. Чистый запуск без доступного Python за3.058s, повтор1.809s; встроенный DLL и занятый порт проверены. [Актуальный дополнительный протокол](integration/20260923-portable.md). Следующий commit включает только тот же EXE, notices, README и доказательства. Автоматизация PAUSED; подача/доступ реального жюри NOT VERIFIED.

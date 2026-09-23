@@ -1,0 +1,52 @@
+{
+  "started_utc": "2026-09-23T12:43:24+00:00",
+  "exe_sha256": "cb7d3b3188ac1f4f00ce0cc6c433a8c11c3b7d05a0e0434652788e7797972457",
+  "machine_hex": "0x8664",
+  "cwd": "D:\\HackAI\\Thats La Peace team project\\.verification\\portable-build-20260923\\exe-smoke",
+  "launch_args": [
+    "--port",
+    "8020",
+    "--no-browser"
+  ],
+  "exe_path_environment": "C:\\WINDOWS\\System32;C:\\WINDOWS",
+  "launcher_pid": 36060,
+  "health": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "ui_title_restored": true,
+  "csp": "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'",
+  "dataset_version": "6a724b6b7dfb5973343e68ba18dadb60fc807d87e3d78f03ee86fb26cb089f7d",
+  "smoke": {
+    "status": "PASS",
+    "dataset_count": 66,
+    "dense_eligible": [
+      6,
+      4
+    ],
+    "rare_eligible": 2,
+    "empty_states": 2,
+    "repeat_order": "stable",
+    "suggestions": 2,
+    "suggestion_kinds": [
+      "increase_budget",
+      "change_date"
+    ],
+    "request_ms": 19.36,
+    "first_date_ids": [
+      "HK-44733",
+      "HK-44923",
+      "HK-77838"
+    ],
+    "second_date_ids": [
+      "HK-44733",
+      "HK-88430",
+      "HK-44923"
+    ]
+  },
+  "status": "PASS",
+  "port_closed_after_cleanup": true,
+  "cleanup_own_tree": true,
+  "finished_utc": "2026-09-23T12:43:29+00:00"
+}

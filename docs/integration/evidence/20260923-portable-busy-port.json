@@ -1,0 +1,55 @@
+{
+  "started_at": "2026-09-23T17:45:27.5070839+05:00",
+  "clean_directory": "D:\\HackAI\\Thats La Peace team project\\.verification\\portable-build-20260923\\fallback-clean-174526",
+  "executable_sha256": "CB7D3B3188AC1F4F00CE0CC6C433A8C11C3B7D05A0E0434652788E7797972457",
+  "path": "C:\\Windows\\System32",
+  "old_listener": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8000,
+      "OwningProcess": 9232
+    }
+  ],
+  "old_health_before": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "launcher_pid": 372,
+  "owned_process_ids": [
+    372,
+    19672,
+    34180,
+    27892
+  ],
+  "stdout": "That's La Peace\r\nOpen http://127.0.0.1:55277/\r\nNo account, API key or internet connection is needed. Stop: Ctrl+C or close this console.\r\n",
+  "actual_port": 55277,
+  "health": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "title": "That's La Peace",
+  "python_dlls": [
+    {
+      "process_id": 27892,
+      "module": "C:\\WINDOWS\\TEMP\\_MEI000085842\\python312.dll"
+    }
+  ],
+  "embedded_python_verified": true,
+  "pass": true,
+  "old_health_after": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "old_listener_after": [
+    {
+      "LocalAddress": "127.0.0.1",
+      "LocalPort": 8000,
+      "OwningProcess": 9232
+    }
+  ],
+  "old_server_preserved": true,
+  "finished_at": "2026-09-23T17:45:30.1381110+05:00"
+}

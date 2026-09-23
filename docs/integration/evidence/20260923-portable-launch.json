@@ -1,0 +1,14 @@
+{
+  "parent_pid": 12888,
+  "startup_ms": 3058,
+  "source_files_present": false,
+  "pythonpath_during_launch": "nonexistent",
+  "pythonhome_during_launch": "nonexistent",
+  "health": {
+    "status": "ok",
+    "api_version": 1,
+    "dataset_count": 66
+  },
+  "path_during_launch": "System32 only",
+  "clean_directory": "D:\\HackAI\\Thats La Peace team project\\.verification\\jury-clean-20260923\\Новая папка"
+}

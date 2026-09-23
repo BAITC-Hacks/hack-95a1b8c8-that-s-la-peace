@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "rows": [
+    {
+      "width": 360,
+      "locale": "ru",
+      "status": "PASS"
+    },
+    {
+      "width": 360,
+      "locale": "kk",
+      "status": "PASS"
+    },
+    {
+      "width": 360,
+      "locale": "en",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "locale": "ru",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "locale": "kk",
+      "status": "PASS"
+    },
+    {
+      "width": 390,
+      "locale": "en",
+      "status": "PASS"
+    },
+    {
+      "width": 1440,
+      "locale": "ru",
+      "status": "PASS"
+    },
+    {
+      "width": 1440,
+      "locale": "kk",
+      "status": "PASS"
+    },
+    {
+      "width": 1440,
+      "locale": "en",
+      "status": "PASS"
+    }
+  ]
+}
