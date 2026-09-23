@@ -43,6 +43,17 @@ async function bounded(promise, ms=12000) {
       if (request.method()==='POST' && endpoint(request.url(),'/api/recommendations')) posted.push({request:request.postDataJSON(), at:performance.now()});
     });
     const field = name => page.locator(`[name="${name}"]`);
+    async function choose(target,name,value) {
+      const wrap=target.locator(`.field:has(select[name="${name}"])`);
+      const input=wrap.locator('.combobox-input');
+      if(await input.getAttribute('aria-expanded')==='true') await input.press('Escape');
+      await wrap.locator('.combobox-toggle').click();
+      await wrap.locator(`.combobox-option[data-value=${JSON.stringify(value)}]`).click();
+    }
+    async function settings(target=page) {
+      const panel=target.locator('.form-settings');
+      if(await panel.getAttribute('open')===null) await panel.locator('summary').click();
+    }
     const auto = page.locator('.auto-toggle input[type=checkbox]');
     const ids = () => page.locator('[data-profile-id]').evaluateAll(nodes=>nodes.map(node=>node.dataset.profileId));
     const values = () => page.locator('form [name]').evaluateAll(nodes=>Object.fromEntries(nodes.map(node=>[node.name,node.value])));
@@ -85,18 +96,19 @@ async function bounded(promise, ms=12000) {
     assert.equal(await auto.isChecked(),true,'Automatic update must initially be enabled.');
 
     await check('Catalog guide: city 50, group 9, date 7; no budget or request yet',async()=>{
-      await field('city').selectOption('Алматы');
+      await choose(page,'city','Алматы');
       await page.locator('.city-count').waitFor();
       assert.equal(guide.city_counts['Алматы'],50);
       assert.match(await page.locator('.city-count').textContent(),/50/);
-      await field('category').selectOption('Ведущий');
-      await field('event_type').selectOption('корпоратив');
+      await choose(page,'category','Ведущий');
+      await choose(page,'event_type','корпоратив');
       const group=guide.groups.find(g=>g.city==='Алматы'&&g.category==='Ведущий'&&g.event_type==='корпоратив');
       assert.ok(group);assert.equal(group.total,9);assert.equal(group.dates['2026-10-15'].available,7);
       assert.match(await page.locator('.guide-count').textContent(),/9/);
-      await field('event_date').fill('2026-10-15');
+      await page.getByLabel('Дата события',{exact:true}).fill('15.10.2026');
       assert.match(await page.locator('.guide-count').textContent(),/7.*9/);
       assert.equal(await field('budget_kzt').inputValue(),'');
+      assert.ok(await page.locator('.price-guide').evaluate(node => Boolean(node.compareDocumentPosition(document.querySelector('[name=budget_kzt]')) & Node.DOCUMENT_POSITION_FOLLOWING)), 'Show real catalog prices before asking for a budget.');
       await sleep(800);assert.equal(posted.length,0,'Incomplete form must not auto-submit.');
       return {city:50,group:9,available_before_budget:7};
     });
@@ -117,13 +129,14 @@ async function bounded(promise, ms=12000) {
     await check('Search text and show-all do not submit or discard current results',async()=>{
       const before=posted.length,beforeIds=await ids();
       const wrap=page.locator('.field:has(select[name="city"])');
-      await wrap.locator('.select-search-input').fill('аст');
+      await wrap.locator('.combobox-input').fill('аст');
       assert.equal(await field('city').inputValue(),'Алматы');
       await sleep(900);
       assert.equal(posted.length,before);assert.deepEqual(await ids(),beforeIds);
-      await wrap.locator('.select-search-all').click();
+      await wrap.locator('.combobox-toggle').click();
       assert.deepEqual(await field('city').locator('option').evaluateAll(nodes=>nodes.map(node=>node.value).filter(Boolean)),meta.cities);
       assert.deepEqual(await ids(),beforeIds);
+      await wrap.locator('.combobox-input').press('Escape');
     });
 
     await check('Text date becomes ISO and automatically requests the new date',async()=>{
@@ -133,7 +146,7 @@ async function bounded(promise, ms=12000) {
       const changed=await consume('TEXT-D2',await pending,{...d1,event_date:'2026-10-16'});
       assert.notDeepEqual(changed.cards.map(card=>card.id),dense.cards.map(card=>card.id));
     });
-    await auto.uncheck();
+    await settings();await auto.uncheck();
 
     await check('Compatible category/format subsets come from the guide; full catalog and current choices remain available',async()=>{
       const toggle=page.locator('.compatibility-toggle input[type=checkbox]');
@@ -141,35 +154,36 @@ async function bounded(promise, ms=12000) {
       const chosen=await values(),beforePosts=posted.length;
       const expectedCategories=meta.categories.filter(value=>value===chosen.category || guide.groups.some(group=>group.city===chosen.city&&group.event_type===chosen.event_type&&group.category===value));
       const expectedFormats=meta.event_types.filter(value=>value===chosen.event_type || guide.groups.some(group=>group.city===chosen.city&&group.category===chosen.category&&group.event_type===value));
-      assert.deepEqual(await categories(),expectedCategories);
+      assert.deepEqual((await categories()).sort(),expectedCategories.sort());
       assert.deepEqual(await field('event_type').locator('option').evaluateAll(nodes=>nodes.map(node=>node.value).filter(Boolean)),expectedFormats);
       // This city has no hosts: retaining the explicit selection keeps the
       // distinct no_category_in_city path reachable rather than rewriting it.
-      await field('city').selectOption('Зарубежье');
+      await choose(page,'city','Зарубежье');
       assert.equal(await field('category').inputValue(),chosen.category);
       assert.equal(await field('event_type').inputValue(),chosen.event_type);
       assert.ok((await categories()).includes(chosen.category));
       await toggle.uncheck();
-      assert.deepEqual(await categories(),meta.categories);
+      assert.deepEqual((await categories()).sort(),[...meta.categories].sort());
       assert.deepEqual(await field('event_type').locator('option').evaluateAll(nodes=>nodes.map(node=>node.value).filter(Boolean)),meta.event_types);
-      await field('city').selectOption(chosen.city);
+      await choose(page,'city',chosen.city);
       assert.deepEqual(await values(),chosen);assert.equal(posted.length,beforePosts);
       return {compatible_categories:expectedCategories.length,compatible_formats:expectedFormats.length,full_categories:meta.categories.length};
     });
 
-    await check('Category groups retain the complete catalog category set',async()=>{
+    await check('Unified service combobox retains all 17 canonical categories in optgroups',async()=>{
       const before=posted.length,all=await categories();
       assert.deepEqual([...all].sort(),[...meta.categories].sort());
-      await page.locator('[data-category-mode=services]').click();
-      const services=await categories();assert.ok(services.includes('Банкетный зал'));assert.ok(!services.includes('Ведущий'));
-      await page.locator('[data-category-mode=people]').click();
-      const people=await categories();assert.ok(people.includes('Ведущий'));assert.ok(!people.includes('Банкетный зал'));
-      assert.deepEqual([...new Set([...people,...services])].sort(),[...all].sort());
-      await page.locator('[data-category-mode=all]').click();
-      assert.deepEqual(await categories(),all);
-      await field('category').selectOption('Ведущий');
-      assert.equal(posted.length,before,'Manual mode must not auto-submit category changes.');
-      return {all:all.length,people:people.length,services:services.length};
+      assert.equal(await page.locator('.category-mode').count(),0);
+      const wrap=page.locator('.field:has(select[name="category"])');
+      assert.equal(await wrap.locator('.combobox-input').count(),1);assert.equal(await field('category').isVisible(),false);
+      assert.equal(await page.getByRole('combobox',{name:'Какая услуга нужна',exact:true}).count(),1);
+      await wrap.locator('.combobox-toggle').click();
+      assert.deepEqual((await wrap.locator('.combobox-option').evaluateAll(nodes=>nodes.map(n=>n.dataset.value).filter(Boolean))).sort(),[...meta.categories].sort());
+      assert.equal(await wrap.locator('.combobox-group').count(),5);
+      await wrap.locator('.combobox-input').press('Escape');
+      await choose(page,'category','Ведущий');
+      assert.equal(posted.length,before,'Manual mode must not auto-submit service choices.');
+      return {all:all.length,groups:5};
     });
     await manual('GROUP-RESTORED',{...d1,event_date:'2026-10-16'});
 
@@ -180,10 +194,19 @@ async function bounded(promise, ms=12000) {
       for(const [locale,label] of [['en','City'],['kk','Қала'],['ru','Город']]) {
         await page.locator('.locale-switch select').selectOption(locale);
         assert.equal(await page.locator('html').getAttribute('lang'),locale);
-        assert.equal(await page.getByLabel(label,{exact:true}).inputValue(),'Алматы');
+        assert.equal(await page.getByRole('combobox',{name:label,exact:true}).inputValue(),locale==='en'?'Almaty':'Алматы');
         assert.deepEqual(await values(),before);assert.deepEqual(await ids(),beforeIds);
         assert.deepEqual(await page.locator('.explanation [data-catalog-text]').allTextContents(),explanations);
         assert.ok(await page.locator('.explanation [data-catalog-text]').evaluateAll(nodes=>nodes.every(node=>node.lang==='ru')));
+        const priceLabels = {ru:'начальная цена по каталогу', kk:'каталогтағы бастапқы баға', en:'starting catalog price'};
+        assert.deepEqual(await page.locator('.price-note').allTextContents(), Array(3).fill(priceLabels[locale]));
+        assert.equal(await page.locator('.result-link').isVisible(),true);
+        if(locale==='kk') {
+          await page.locator('.date-toggle').click();
+          assert.equal(await page.locator('.calendar-month-label').textContent(),'2026 ж. қазан');
+          assert.deepEqual(await page.locator('.calendar-weekdays span').allTextContents(),['Дс','Сс','Ср','Бс','Жм','Сб','Жс']);
+          await page.locator('.date-toggle').press('Escape');
+        }
         if(locale==='en') assert.equal(await page.getByText('Catalog descriptions and explanations are provided in Russian.',{exact:true}).isVisible(),true);
         if(locale==='kk') assert.equal(await page.getByText('Каталог сипаттамалары мен түсіндірмелері орыс тілінде берілген.',{exact:true}).isVisible(),true);
       }
@@ -194,29 +217,60 @@ async function bounded(promise, ms=12000) {
       const reloaded=await context.newPage();
       try {
         await reloaded.goto(url.href,{waitUntil:'domcontentloaded'});
-        await reloaded.waitForFunction(()=>document.querySelector('.select-search-input'));
+        await reloaded.waitForFunction(()=>document.querySelector('.combobox-input'));
         await reloaded.reload({waitUntil:'domcontentloaded'});
-        await reloaded.waitForFunction(()=>document.querySelector('.select-search-input'));
+        await reloaded.waitForFunction(()=>document.querySelector('.combobox-input'));
         assert.equal(await reloaded.locator('html').getAttribute('lang'),'en');
         await reloaded.locator('.locale-switch select').selectOption('ru');
         const citySearch=reloaded.locator('.field:has(select[name="city"])');
-        assert.equal(await citySearch.locator('.select-search-label').textContent(),'Поиск в списке: Город');
-        await citySearch.locator('.select-search-input').fill('аст');
-        assert.equal(await citySearch.locator('.select-search-label').textContent(),'Поиск в списке: Город');
+        assert.equal(await reloaded.getByRole('combobox',{name:'Город',exact:true}).count(),1);
+        await citySearch.locator('.combobox-input').fill('аст');
+        assert.equal(await citySearch.locator('.combobox-option[data-value="Астана"]').isVisible(),true);
+        assert.equal(await reloaded.getByRole('combobox',{name:'Город',exact:true}).count(),1);
       } finally {await reloaded.close();await page.locator('.locale-switch select').selectOption('ru');}
     });
 
-    await check('Guide calendar contains all 100 covered days and sets the chosen date',async()=>{
-      assert.equal(await page.locator('.calendar-day').count(),100);
-      const dates=await page.locator('.calendar-day').evaluateAll(nodes=>nodes.map(node=>node.dataset.date));
+    await check('One date input and one-month calendar cover all 100 allowed days',async()=>{
+      assert.equal(await field('event_date').getAttribute('type'),'hidden');
+      assert.equal(await page.getByLabel('Дата события',{exact:true}).count(),1);
+      await page.locator('.date-toggle').click();
+      const previous=page.locator('.calendar-nav').first(),next=page.locator('.calendar-nav').last();
+      report.calendar_navigation=[];
+      const trace=async step=>report.calendar_navigation.push({step,visible:await page.locator('.date-calendar').isVisible(),month:await page.locator('.calendar-month-label').textContent(),active:await page.evaluate(()=>({tag:document.activeElement?.tagName,class:document.activeElement?.className}))});
+      await trace('opened');
+      for(let count=0;count<4&&await previous.isEnabled();count++) {await previous.click();await trace('previous to minimum');}
+      const dates=[];
+      for(let month=0;month<4;month++) {
+        const visible=await page.locator('.calendar-day').count();assert.ok(visible>=28&&visible<=31);
+        dates.push(...await page.locator('.calendar-day:not(:disabled)').evaluateAll(nodes=>nodes.map(node=>node.dataset.date)));
+        if(month<3) {await next.click();await trace('next month');}
+      }
       assert.equal(dates[0],'2026-09-23');assert.equal(dates.at(-1),'2026-12-31');assert.equal(new Set(dates).size,100);
-      const calendar=page.locator('.availability-note');
-      if(await calendar.getAttribute('open')===null) await calendar.locator('summary').click();
+      assert.equal(await next.isDisabled(),true);await previous.click();await trace('back to November');await previous.click();await trace('back to October');
       await page.locator('.calendar-day[data-date="2026-10-15"]').click();
       assert.equal(await field('event_date').inputValue(),'2026-10-15');
       assert.equal(await field('event_date_text').inputValue(),'15.10.2026');
+      assert.equal(await page.locator('.date-calendar').isVisible(),false);
+      await page.locator('.date-toggle').click();
       assert.equal(await page.locator('.calendar-day[data-date="2026-10-15"]').getAttribute('aria-pressed'),'true');
+      assert.equal(await page.locator('.calendar-day[data-date="2026-10-15"] .calendar-count').textContent(),'7');
+      await page.locator('.date-toggle').click();
       await manual('CALENDAR-D1',d1);
+    });
+
+    await check('Manual impossible and out-of-coverage dates stay visible and never reach the API',async()=>{
+      const before=posted.length;
+      for(const value of ['31.11.2026','22.09.2026','01.01.2027']) {
+        await page.getByLabel('Дата события',{exact:true}).fill(value);
+        await page.locator('.submit-button').click();
+        await page.locator('[data-state=invalid]').waitFor();
+        assert.equal(await field('event_date_text').inputValue(),value);
+        assert.equal(await field('event_date_text').getAttribute('aria-invalid'),'true');
+        assert.equal(posted.length,before);
+      }
+      await page.getByLabel('Дата события',{exact:true}).fill('15102026');
+      assert.equal(await field('event_date').inputValue(),'2026-10-15');
+      assert.equal(await field('event_date_text').inputValue(),'15.10.2026');
     });
 
     await check('Incomplete numeric hours do not submit or disappear; clearing restores automatic selection',async()=>{
@@ -238,12 +292,11 @@ async function bounded(promise, ms=12000) {
       await auto.uncheck();
     });
 
-    await check('Mobile 360/390px with an expanded calendar has no horizontal overflow',async()=>{
+    await check('Mobile 320/360/390px with an expanded calendar has no horizontal overflow',async()=>{
       const result=[];
-      for(const width of [360,390]) {
+      for(const width of [320,360,390]) {
         await page.setViewportSize({width,height:844});
-        const calendar=page.locator('.availability-note');
-        if(await calendar.getAttribute('open')===null) await calendar.locator('summary').click();
+        if(!await page.locator('.date-calendar').isVisible()) await page.locator('.date-toggle').click();
         const size=await page.evaluate(()=>({viewport:innerWidth,document:document.documentElement.scrollWidth,body:document.body.scrollWidth}));
         if(process.env.UI_CHECK_OUTPUT) await page.screenshot({path:path.join(output,`ux-mobile-${width}.png`),fullPage:true});
         if(size.document>width || size.body>width) {
@@ -313,10 +366,10 @@ async function bounded(promise, ms=12000) {
         await bounded(settled);if(routeError) throw routeError;
         await faultPage.waitForFunction(()=>document.querySelector('fieldset')&&!document.querySelector('fieldset').disabled);
         const faultField=name=>faultPage.locator(`[name="${name}"]`);
-        await faultField('city').selectOption('Алматы');
-        await faultField('category').selectOption('Ведущий');
-        await faultField('event_type').selectOption('корпоратив');
-        await faultField('event_date').fill('2026-10-15');
+        await choose(faultPage,'city','Алматы');
+        await choose(faultPage,'category','Ведущий');
+        await choose(faultPage,'event_type','корпоратив');
+        await faultPage.getByLabel('Дата события',{exact:true}).fill('15.10.2026');
         const pending=faultPage.waitForResponse(response=>response.request().method()==='POST'&&endpoint(response.url(),'/api/recommendations'));
         const start=performance.now();await faultField('budget_kzt').fill('1000000');
         const response=await pending;assert.equal(response.status(),200);
@@ -325,11 +378,15 @@ async function bounded(promise, ms=12000) {
         await faultPage.locator('[data-state=matched]').waitFor();
         assert.deepEqual(await faultPage.locator('[data-profile-id]').evaluateAll(nodes=>nodes.map(node=>node.dataset.profileId)),data.cards.map(card=>card.id));
         assert.equal(await faultPage.locator('.price-guide').textContent(),'');
-        assert.equal(await faultPage.locator('.calendar-day').count(),0);
-        assert.equal(await faultPage.locator('.availability-note').isVisible(),false);
         assert.equal(await faultPage.locator('.compatibility-toggle').isVisible(),false);
-        assert.deepEqual(await faultField('category').locator('option').evaluateAll(nodes=>nodes.map(node=>node.value).filter(Boolean)),meta.categories);
+        assert.deepEqual((await faultField('category').locator('option').evaluateAll(nodes=>nodes.map(node=>node.value).filter(Boolean))).sort(),[...meta.categories].sort());
         assert.equal(posts,1);
+        await settings(faultPage);await faultPage.locator('.auto-toggle input').uncheck();
+        await faultPage.locator('.date-toggle').click();
+        assert.equal(await faultPage.locator('.date-calendar').isVisible(),true);
+        assert.equal(await faultPage.locator('.calendar-count').count(),0,'An untrusted/unavailable guide must not supply availability counts.');
+        await faultPage.locator('.calendar-day[data-date="2026-10-16"]').click();
+        assert.equal(await faultField('event_date').inputValue(),'2026-10-16','Basic date selection must work without an optional guide.');
         report.reference_fault_post_count=(report.reference_fault_post_count||0)+posts;
         report.runs.push({id:`REFERENCE-${mode}`,request:d1,http_status:response.status(),eligible_count:data.eligible_count,shown:data.cards.length,ids:data.cards.map(card=>card.id),input_to_visible_ms:Math.round(performance.now()-start),simulation:'reference only; real recommendation response'});
       } finally {await faultContext.close();}

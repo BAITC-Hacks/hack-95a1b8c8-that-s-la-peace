@@ -51,21 +51,33 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
   });
   const state = async value => page.locator(`[data-state="${value}"]`).waitFor();
   const submit = async value => {await page.getByRole('button', {name: 'Подобрать варианты'}).click(); await state(value);};
+  async function choose(name, value) {
+    const field = page.locator(`.field:has(select[name="${name}"])`);
+    const input = field.locator('.combobox-input');
+    await input.click();
+    await input.fill('');
+    await field.locator(`.combobox-option[data-value=${JSON.stringify(value)}]`).click();
+    assert.equal(await field.locator('select').inputValue(), value, `${name}: visible selection must preserve the canonical API value.`);
+  }
   try {
     await page.goto(baseUrl);
     await state('idle');
+    await page.locator('.form-settings > summary').click();
     await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
     assert.equal(await page.locator('[name=event_date]').getAttribute('min'), '2026-09-23');
     assert.equal(await page.locator('[name=event_date]').getAttribute('max'), '2026-12-31');
     await submit('invalid');
     assert.equal(requests.length, 0);
-    assert.equal(await page.locator('.field-error:visible').count(), 5, 'Five logical required fields; the date has two synchronized inputs.');
+    assert.equal(await page.locator('.field-error:visible').count(), 5, 'Five logical required fields, including one visible date field.');
+    assert.equal(await page.getByLabel('Дата события').count(), 1);
+    assert.equal(await page.getByLabel('Дата события').isVisible(), true);
     console.log('PASS required fields and calendar bounds');
 
-    await page.getByLabel('Город', {exact: true}).selectOption('Алматы');
-    await page.getByLabel('Дата события').fill('2026-10-15');
-    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption('корпоратив');
-    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption('Ведущий');
+    await choose('city', 'Алматы');
+    await page.getByLabel('Дата события').fill('15.10.2026');
+    assert.equal(await page.locator('[name=event_date]').inputValue(), '2026-10-15');
+    await choose('event_type', 'корпоратив');
+    await choose('category', 'Ведущий');
     await page.getByLabel('Бюджет, ₸').fill('1000000');
     holdResponse = true;
     await page.getByRole('button', {name: 'Подобрать варианты'}).click();
@@ -114,7 +126,7 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     await page.getByLabel('Длительность, ч').fill('0'); await submit('invalid');
     assert.equal(requests.length, beforeInvalid);
     await page.getByLabel('Длительность, ч').fill('2');
-    await page.getByLabel('Язык', {exact: true}).selectOption('русский');
+    await choose('language', 'русский');
     mode = 'matched'; await submit('matched');
     assert.equal(requests.at(-1).duration_hours, 2); assert.equal(requests.at(-1).language, 'русский');
     console.log('PASS out-of-window date, duration validation and optional values');
@@ -124,6 +136,8 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     await page.getByLabel('Бюджет, ₸').fill('1000000');
     mode = 'facts'; await submit('matched');
     assert.equal(await page.locator('[data-explanation-mode=deterministic_fallback]').count(), 1);
+    await page.locator('details.guide-details > summary').click();
+    assert.equal(await page.locator('[data-explanation-mode=deterministic_fallback]').isVisible(), true);
     assert.equal(await page.locator('.profile-languages').count(), 2);
     assert.match(await page.locator('.profile-duration').nth(1).innerText(), /неприменимо/);
     assert.match(await page.locator('.data-source').nth(1).innerText(), /команд/);
@@ -131,11 +145,13 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     console.log('PASS integer budget, profile facts, source and honest fallback label');
     for (const kind of ['change_date', 'increase_budget']) {
       mode = kind === 'change_date' ? 'suggest_date' : 'suggest_budget';
-      const oldDate = await page.getByLabel('Дата события').inputValue();
+      const oldDate = await page.locator('[name=event_date]').inputValue();
+      const oldDateText = await page.getByLabel('Дата события').inputValue();
       const oldBudget = await page.getByLabel('Бюджет, ₸').inputValue();
       await submit('no_matches');
       const beforeClick = requests.length;
-      assert.equal(await page.getByLabel('Дата события').inputValue(), oldDate);
+      assert.equal(await page.locator('[name=event_date]').inputValue(), oldDate);
+      assert.equal(await page.getByLabel('Дата события').inputValue(), oldDateText);
       assert.equal(await page.getByLabel('Бюджет, ₸').inputValue(), oldBudget);
       assert.equal(requests.length, beforeClick);
       mode = 'matched';
@@ -157,6 +173,7 @@ const matched = {api_version: 1, dataset_version: 'a'.repeat(64), explanation_mo
     assert.equal(await page.getByRole('button', {name: 'Подобрать варианты'}).isDisabled(), true);
     metaUnavailable = false;
     await page.getByRole('button', {name: 'Попробовать ещё раз'}).click(); await state('idle');
+    await page.locator('.form-settings > summary').click();
     await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
     assert.deepEqual(errors, []);
     console.log('PASS metadata failure/recovery and no browser exceptions');

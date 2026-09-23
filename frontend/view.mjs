@@ -58,9 +58,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   intro.append(titleGroup, el("p", "intro-copy", "Расскажите о мероприятии. Получите до трёх подходящих вариантов и понятное объяснение для каждого."));
   const workspace = el("div", "workspace");
   const brief = el("section", "brief-panel");
-  const kicker = el("p", "panel-kicker");
-  kicker.append(el("span", "step-number", "01"), el("span", "", "Ваше мероприятие"));
-  brief.append(kicker, el("h2", "", "Начнём с деталей"), el("p", "panel-copy", "Пять обязательных полей. Язык и длительность можно уточнить дополнительно."));
+  brief.append(el("h2", "", "Ваше мероприятие"));
   const form = el("form");
   form.id = `${uid}-form`;
   form.noValidate = true;
@@ -101,49 +99,63 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
 
   grid.append(
     makeField("city", "Город", "select", true),
-    makeField("event_date", "Дата события", "date", true),
+    makeField("event_date", "Дата события", "hidden", true),
     makeField("event_type", "Формат мероприятия", "select", true),
-    makeField("category", "Кого или что ищем", "select", true),
+    makeField("category", "Какая услуга нужна", "select", true),
     makeField("budget_kzt", "Бюджет, ₸", "text", true, "На одного подрядчика или площадку за мероприятие.")
   );
   const dateText = el('input', 'date-text');
   dateText.id = `${uid}-date-text`;
-  dateText.type = 'text'; dateText.name = 'event_date_text'; dateText.inputMode = 'numeric';
-  dateText.placeholder = 'ДД.ММ.ГГГГ'; dateText.setAttribute('aria-label', 'Дата текстом');
+  dateText.type = 'text'; dateText.name = 'event_date_text'; dateText.inputMode = 'numeric'; dateText.required = true;
+  dateText.placeholder = 'ДД.ММ.ГГГГ'; dateText.autocomplete = 'off';
   dateText.setAttribute('aria-describedby', fields.event_date.error.id);
+  dateText.addEventListener('blur', () => {
+    if (isISODate(fields.event_date.input.value)) dateText.value = displayDate(fields.event_date.input.value);
+  });
   const dateEntry = el('div', 'date-entry');
-  const dateTextLabel = el('label', 'field-hint', 'Или введите дату: ДД.ММ.ГГГГ');
-  dateTextLabel.htmlFor = dateText.id;
-  fields.event_date.input.replaceWith(dateEntry);
-  dateEntry.append(fields.event_date.input, dateTextLabel, dateText);
-  const categoryMode = el('div', 'category-mode');
-  categoryMode.setAttribute('role', 'group'); categoryMode.setAttribute('aria-label', 'Категория');
-  let activeCategoryMode = 'all';
-  for (const [value,label] of [['all','Все категории'], ['people','Люди и команды'], ['services','Площадки и услуги']]) {
-    const button = el('button', '', label); button.type = 'button'; button.dataset.categoryMode = value;
-    button.setAttribute('aria-pressed', String(value === 'all'));
-    button.addEventListener('click', () => {
-      activeCategoryMode = value;
-      for (const item of categoryMode.children) item.setAttribute('aria-pressed', String(item === button));
-      updateCategoryOptions();
-      onInput({target: fields.category.input});
-    });
-    categoryMode.append(button);
-  }
-  fields.category.wrap.insertBefore(categoryMode, fields.category.input);
+  fields.event_date.wrap.classList.add('date-field');
+  fields.event_date.wrap.querySelector('label').htmlFor = dateText.id;
+  const dateToggle = el('button', 'date-toggle');
+  const calendarIcon = doc.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  for (const [key,value] of Object.entries({viewBox:'0 0 24 24',width:'20',height:'20',fill:'none',stroke:'currentColor','stroke-width':'1.7','stroke-linecap':'round','aria-hidden':'true'})) calendarIcon.setAttribute(key, value);
+  const calendarPath = doc.createElementNS('http://www.w3.org/2000/svg', 'path');
+  calendarPath.setAttribute('d', 'M7 3v4M17 3v4M3 10h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z');
+  calendarIcon.append(calendarPath); dateToggle.append(calendarIcon);
+  dateToggle.type = 'button'; dateToggle.setAttribute('aria-label', 'Открыть календарь');
+  dateToggle.setAttribute('aria-expanded', 'false'); dateToggle.setAttribute('aria-controls', `${uid}-calendar`);
+  const dateCalendar = el('div', 'date-calendar');
+  dateCalendar.id = `${uid}-calendar`; dateCalendar.hidden = true;
+  dateCalendar.setAttribute('role', 'group'); dateCalendar.setAttribute('aria-label', 'Выбор даты');
+  let calendarMonth = '';
+  fields.event_date.input.after(dateEntry, dateCalendar);
+  dateEntry.append(dateText, dateToggle);
+  dateToggle.addEventListener('click', () => {
+    if (!metadata) return;
+    const opening = dateCalendar.hidden;
+    dateCalendar.hidden = !opening; dateToggle.setAttribute('aria-expanded', String(opening));
+    if (opening) {
+      calendarMonth = (fields.event_date.input.value || metadata.date_range.min).slice(0, 7);
+      renderCalendar();
+    }
+  });
+  function closeCalendar() { dateCalendar.hidden = true; dateToggle.setAttribute('aria-expanded', 'false'); }
+  fields.event_date.wrap.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && !dateCalendar.hidden) { event.preventDefault(); closeCalendar(); dateToggle.focus(); }
+  });
+  function closeCalendarOutside(event) { if (!fields.event_date.wrap.contains(event.target)) closeCalendar(); }
+  doc.addEventListener('pointerdown', closeCalendarOutside);
+  // Replacing a month's buttons briefly removes the focused node. Only an
+  // actual focus move outside the date field should close this inline picker.
+  doc.addEventListener('focusin', closeCalendarOutside);
   const compatibilityWrap = el('label', 'compatibility-toggle');
   const compatibilityInput = el('input'); compatibilityInput.type = 'checkbox'; compatibilityInput.checked = true;
   compatibilityWrap.hidden = true;
   compatibilityWrap.append(compatibilityInput, el('span', '', 'Скрывать несовместимые категории и форматы'));
-  const compatibilityHint = el('p', 'field-hint', 'По городу, категории и формату. Снимите отметку, чтобы увидеть все варианты. Текущий выбор сохраняется.');
-  compatibilityWrap.append(compatibilityHint); fields.category.wrap.append(compatibilityWrap);
   compatibilityInput.addEventListener('change', () => { updateCategoryOptions(); updateFormatOptions(); refreshLanguage(); });
   fields.budget_kzt.input.placeholder = "Например, 1 000 000";
   fields.budget_kzt.input.step = "1";
   fields.budget_kzt.input.min = "1";
   fields.budget_kzt.input.inputMode = "numeric";
-  const budgetPreview = el('p', 'budget-preview');
-  budgetPreview.setAttribute('aria-live', 'polite'); fields.budget_kzt.wrap.append(budgetPreview);
   for (const name of ["city", "event_date", "event_type", "category", "budget_kzt"]) fields[name].input.required = true;
   const optional = el("details", "optional-fields");
   optional.append(el("summary", "", "Язык и длительность · необязательно"));
@@ -164,19 +176,27 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   const autoInput = el('input'); autoInput.type = 'checkbox'; autoInput.checked = true;
   autoInput.setAttribute('aria-label', 'Обновлять варианты автоматически');
   autoWrap.append(autoInput, el('span', '', 'Обновлять варианты автоматически'));
-  const autoHint = el('p', 'field-hint', 'После заполнения пяти полей. Условия не меняются без вашего выбора.');
+  const settings = el('details', 'form-settings');
+  settings.append(el('summary', '', 'Настройки подбора'), autoWrap, compatibilityWrap);
   const priceGuide = el('aside', 'price-guide');
-  const availability = el('details', 'availability-note');
-  fieldset.append(grid, priceGuide, availability, optional, autoWrap, autoHint, submitButton);
+  priceGuide.hidden = true;
+  priceGuide.classList.add('field-wide');
+  fields.budget_kzt.wrap.before(priceGuide);
+  const resultLink = el('a', 'result-link', 'Посмотреть результат');
+  resultLink.href = `#${uid}-results-title`;
+  resultLink.hidden = true;
+  fieldset.append(grid, optional, settings, submitButton, resultLink);
   form.append(fieldset);
   const calendarNote = el("p", "form-note", "Доступные даты появятся после загрузки каталога.");
-  brief.append(form, calendarNote);
+  dateCalendar.append(calendarNote);
+  brief.append(form);
 
   const results = el("section", "results-panel");
   results.setAttribute("aria-labelledby", `${uid}-results-title`);
   const resultsHeader = el("div", "results-heading");
   const resultsTitle = el("h2", "", "Ваши варианты");
   resultsTitle.id = `${uid}-results-title`;
+  resultsTitle.tabIndex = -1;
   const resultsMeta = el("span", "results-meta", "До 3 рекомендаций");
   resultsHeader.append(resultsTitle, resultsMeta);
   const catalogNotice = el("p", "catalog-notice", "Демонстрационный каталог. Имена изменены.");
@@ -202,6 +222,8 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     locale = localeSelect.value;
     try { view.localStorage.setItem('tlp-locale', locale); } catch {}
     refreshLanguage();
+    for (const control of searchControls.values()) control.refreshLanguage?.();
+    if (!dateCalendar.hidden) renderCalendar();
   });
   autoInput.addEventListener('change', () => {
     clearTimeout(autoTimer);
@@ -237,12 +259,15 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       error.textContent = message;
       error.hidden = false;
       if (name === "language" || name === "duration_hours") optional.open = true;
-      first ||= input;
+      first ||= name;
     }
-    first?.focus();
+    if (first === 'event_date') dateText.focus();
+    else if (searchControls.has(first)) searchControls.get(first).focus();
+    else if (first) fields[first].input.focus();
   }
 
   function showState(kind, title, message, retry = null) {
+    resultLink.hidden = true;
     const state = el("div", `result-state${kind === "error" ? " is-error" : kind === "loading" ? " is-loading" : ""}`);
     state.dataset.state = kind;
     const graphic = el("div", "state-graphic");
@@ -264,26 +289,31 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     const previous = input.value;
     const options = [el("option", "", placeholder)];
     options[0].value = "";
-    for (const value of values) {
-      const option = el("option", "", value);
-      option.value = value;
-      options.push(option);
+    if (name === 'category') {
+      for (const [label, members] of serviceGroups) {
+        const group = el('optgroup'); group.label = label;
+        for (const value of values.filter(value => members.includes(value))) {
+          const option = el('option', '', serviceLabels[value] || value); option.value = value; group.append(option);
+        }
+        if (group.children.length) options.push(group);
+      }
+      for (const value of values.filter(value => !serviceGroups.some(([, members]) => members.includes(value)))) {
+        const option = el('option', '', value); option.value = value; options.push(option);
+      }
+    } else for (const value of values) {
+      const option = el("option", "", value); option.value = value; options.push(option);
     }
     input.replaceChildren(...options);
     if (values.includes(previous)) input.value = previous;
     searchControls.get(name)?.refresh();
   }
 
-  // UI grouping, not a new provider attribute or API filter.
-  const serviceCategories = new Set(['Банкетный зал', 'Ресторан', 'Декоратор', 'Флорист', 'Загородная площадка', 'Отель', 'Подарки и сувениры', 'Фото и видеобудки']);
   function updateCategoryOptions() {
     if (!metadata) return;
-    const search = fields.category.wrap.querySelector('.select-search-input');
-    if (search) search.value = '';
     const city = fields.city.input.value, format = fields.event_type.input.value;
-    const values = metadata.categories.filter(value => (activeCategoryMode === 'all' || (activeCategoryMode === 'services') === serviceCategories.has(value))
-      && (!guide || !compatibilityInput.checked || !city || fields.category.input.value === value || guide.groups.some(group => group.city === city && group.category === value && (!format || group.event_type === format))));
-    setOptions('category', values, 'Выберите категорию');
+    const values = metadata.categories.filter(value => !guide || !compatibilityInput.checked || !city || fields.category.input.value === value
+      || guide.groups.some(group => group.city === city && group.category === value && (!format || group.event_type === format)));
+    setOptions('category', values, 'Выберите услугу');
     refreshLanguage();
   }
 
@@ -306,24 +336,21 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       let position = 0; let seen = 0;
       while (position < input.value.length && seen < digitsBefore) if (/\d/.test(input.value[position++])) seen++;
       if (doc.activeElement === input) input.setSelectionRange(position, position);
-      budgetPreview.textContent = `${money.format(value)} ₸`;
-    } else budgetPreview.textContent = '';
+    }
   }
 
   function updateGuide() {
-    priceGuide.replaceChildren(); availability.replaceChildren(); availability.hidden = true;
+    priceGuide.replaceChildren(); priceGuide.hidden = true;
+    if (!dateCalendar.hidden) renderCalendar();
     if (!guide || !metadata || guide.dataset_version !== metadata.dataset_version) return;
     const city = fields.city.input.value, category = fields.category.input.value, eventType = fields.event_type.input.value;
-    priceGuide.append(el('h3', '', 'Ценовой ориентир'));
-    priceGuide.append(el('p', 'field-hint', 'По городу, категории и формату мероприятия.'));
+    if (!city) return;
+    priceGuide.hidden = false;
     if (city && Number.isInteger(guide.city_counts[city])) priceGuide.append(el('p', 'city-count', `${city}: ${guide.city_counts[city]} профилей в каталоге`));
-    if (!city || !category || !eventType) {
-      priceGuide.append(el('p', '', 'Выберите город, категорию и формат для справки о ценах и датах.')); refreshLanguage(); return;
-    }
+    if (!category || !eventType) { refreshLanguage(); return; }
     const group = guide.groups.find(item => item.city === city && item.category === category && item.event_type === eventType);
     if (!group) {
       priceGuide.append(el('p', '', 'В этом сочетании нет профилей. Можно выбрать другую категорию или формат.'));
-      priceGuide.append(el('p', 'field-hint', 'Все варианты остаются доступны: отсутствие совпадений будет объяснено.'));
       refreshLanguage(); return;
     }
     const selected = group.dates[fields.event_date.input.value];
@@ -332,28 +359,68 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     const max = selected ? selected.price_max : group.price_max;
     priceGuide.append(el('p', 'guide-count', selected ? `На выбранную дату свободны: ${count} из ${group.total}.` : `В выбранной группе: ${count} профилей.`));
     if (count > 0) priceGuide.append(el('p', 'guide-price', min === max ? `Начальная цена: ${money.format(min)} ₸` : `Начальные цены: ${money.format(min)}–${money.format(max)} ₸`));
-    priceGuide.append(el('p', 'field-hint', 'Начальные цены по каталогу, не итоговая смета. Язык, длительность и бюджет здесь не учтены.'));
-    availability.hidden = false;
-    availability.append(el('summary', '', 'Доступность по календарю каталога'), el('p', 'field-hint', 'Число на дате — свободные профили. Ноль означает, что все заняты. Дату можно выбрать и проверить подбором.'));
-    const months = new Map();
-    for (const [date, stats] of Object.entries(group.dates)) {
-      const month = date.slice(0, 7);
-      if (!months.has(month)) {
-        const block = el('div', 'calendar-month'); block.append(el('h4', '', month));
-        const days = el('div', 'calendar-days'); block.append(days); availability.append(block); months.set(month, days);
-      }
-      const button = el('button', stats.available ? 'calendar-day' : 'calendar-day is-busy', `${Number(date.slice(8))} · ${stats.available}`);
+    priceGuide.append(el('p', 'field-hint', 'По каталогу, без учёта бюджета, языка и часов. Не итоговая смета.'));
+    refreshLanguage();
+  }
+
+  function renderCalendar() {
+    if (!metadata) return;
+    const minMonth = metadata.date_range.min.slice(0, 7), maxMonth = metadata.date_range.max.slice(0, 7);
+    if (!calendarMonth || calendarMonth < minMonth) calendarMonth = minMonth;
+    if (calendarMonth > maxMonth) calendarMonth = maxMonth;
+    const [year, month] = calendarMonth.split('-').map(Number);
+    const heading = el('div', 'calendar-heading');
+    const previous = el('button', 'calendar-nav', '‹'), next = el('button', 'calendar-nav', '›');
+    previous.type = next.type = 'button';
+    previous.setAttribute('aria-label', 'Предыдущий месяц'); next.setAttribute('aria-label', 'Следующий месяц');
+    previous.disabled = calendarMonth === minMonth; next.disabled = calendarMonth === maxMonth;
+    // Some browsers lack Kazakh ICU names and return "M10" / English weekdays.
+    const kkMonths = ['қаңтар', 'ақпан', 'наурыз', 'сәуір', 'мамыр', 'маусым', 'шілде', 'тамыз', 'қыркүйек', 'қазан', 'қараша', 'желтоқсан'];
+    const monthText = locale === 'kk' ? `${year} ж. ${kkMonths[month - 1]}` : new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ru-RU', {month:'long', year:'numeric', timeZone:'UTC'}).format(new Date(Date.UTC(year, month - 1, 1)));
+    const monthLabel = el('strong', 'calendar-month-label', monthText);
+    monthLabel.setAttribute('aria-live', 'polite');
+    const changeMonth = delta => {
+      calendarMonth = new Date(Date.UTC(year, month - 1 + delta, 1)).toISOString().slice(0, 7);
+      renderCalendar();
+      const nav = dateCalendar.querySelector(delta < 0 ? '.calendar-nav:first-child' : '.calendar-nav:last-child');
+      (nav?.disabled ? dateCalendar.querySelector('.calendar-day:not(:disabled)') : nav)?.focus();
+    };
+    previous.addEventListener('click', () => changeMonth(-1)); next.addEventListener('click', () => changeMonth(1));
+    heading.append(previous, monthLabel, next);
+    const weekdays = el('div', 'calendar-weekdays'); weekdays.setAttribute('aria-hidden', 'true');
+    for (let day = 0; day < 7; day++) weekdays.append(el('span', '', locale === 'kk' ? ['Дс', 'Сс', 'Ср', 'Бс', 'Жм', 'Сб', 'Жс'][day] : new Intl.DateTimeFormat(locale === 'en' ? 'en-GB' : 'ru-RU', {weekday:'short', timeZone:'UTC'}).format(new Date(Date.UTC(2026, 8, 28 + day)))));
+    const days = el('div', 'calendar-days');
+    const first = (new Date(Date.UTC(year, month - 1, 1)).getUTCDay() + 6) % 7;
+    for (let index = 0; index < first; index++) days.append(el('span', 'calendar-empty'));
+    const group = guide?.groups.find(item => item.city === fields.city.input.value && item.category === fields.category.input.value && item.event_type === fields.event_type.input.value);
+    const length = new Date(Date.UTC(year, month, 0)).getUTCDate();
+    for (let day = 1; day <= length; day++) {
+      const date = `${calendarMonth}-${String(day).padStart(2, '0')}`;
+      const stats = group?.dates[date];
+      const button = el('button', `calendar-day${stats?.available === 0 ? ' is-busy' : ''}`, String(day));
       button.type = 'button'; button.dataset.date = date;
-      button.setAttribute('aria-label', `${displayDate(date)}: ${stats.available} свободных профилей`);
+      button.disabled = date < metadata.date_range.min || date > metadata.date_range.max;
+      button.setAttribute('aria-label', stats ? `${displayDate(date)}: ${stats.available} свободных профилей` : displayDate(date));
       button.setAttribute('aria-pressed', String(fields.event_date.input.value === date));
+      if (stats) button.append(el('small', 'calendar-count', String(stats.available)));
       button.addEventListener('click', () => {
         fields.event_date.input.value = date; dateText.value = displayDate(date);
-        onInput({target: fields.event_date.input});
-        availability.querySelector(`[data-date="${date}"]`)?.focus();
+        closeCalendar(); onInput({target: fields.event_date.input}); dateText.focus();
       });
-      months.get(month).append(button);
+      button.addEventListener('keydown', event => {
+        const steps = {ArrowLeft:-1, ArrowRight:1, ArrowUp:-7, ArrowDown:7};
+        if (!(event.key in steps)) return;
+        event.preventDefault();
+        const target = new Date(Date.UTC(year, month - 1, day + steps[event.key])).toISOString().slice(0, 10);
+        if (target < metadata.date_range.min || target > metadata.date_range.max) return;
+        calendarMonth = target.slice(0, 7); renderCalendar();
+        dateCalendar.querySelector(`[data-date="${target}"]`)?.focus();
+      });
+      days.append(button);
     }
-    availability.append(el('p', 'field-hint', 'Названий мероприятий и ссылок на них в исходных данных нет.'));
+    dateCalendar.replaceChildren(heading, weekdays, days);
+    if (group) dateCalendar.append(el('p', 'field-hint', 'Под датой — свободные профили по каталогу, без учёта бюджета, языка и часов.'));
+    dateCalendar.append(calendarNote);
     refreshLanguage();
   }
 
@@ -363,7 +430,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     metadata = null;
     guide = null;
     compatibilityWrap.hidden = true;
-    priceGuide.replaceChildren(); availability.replaceChildren(); availability.hidden = true;
+    priceGuide.replaceChildren(); priceGuide.hidden = true; closeCalendar();
     clearErrors();
     setBusy(true);
     showState("loading", "Загружаем каталог", "Проверяем доступные города, категории и календарь.");
@@ -379,13 +446,14 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       metadata = data;
       setOptions("city", data.cities, "Выберите город");
       setOptions("event_type", data.event_types, "Выберите формат");
-      setOptions("category", data.categories, "Выберите категорию");
+      setOptions("category", data.categories, "Выберите услугу");
       setOptions("language", data.languages, "Без предпочтений");
       for (const name of ['city', 'event_type', 'category', 'language']) {
         if (!searchControls.has(name)) searchControls.set(name, enhanceSelect(fields[name].input, {
           fieldLabel: fields[name].label,
-          allText: 'Все',
-          getSearchText: option => `${option.value} ${translate(option.value, locale)}`,
+          getDisplayText: option => translate(option.value ? (name === 'category' ? serviceLabels[option.value] || option.value : option.value) : ({city:'Выберите город',event_type:'Выберите формат',category:'Выберите услугу',language:'Без предпочтений'}[name]), locale),
+          getSearchText: option => `${option.value} ${translate(option.value, locale)} ${name === 'category' ? `${serviceLabels[option.value] || ''} ${translate(serviceLabels[option.value] || '', locale)}` : ''}`,
+          getGroupText: group => translate(group.label, locale),
           onRender: refreshLanguage,
         }));
       }
@@ -449,6 +517,8 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     const sourceMessage = el('p', '', data.message); sourceMessage.dataset.catalogText = ''; sourceMessage.lang = 'ru';
     summary.append(el("h3", "", titles[data.status]), sourceMessage);
     summary.append(el("p", "request-summary", `${request.city} · ${request.category} · ${displayDate(request.event_date)} · ${request.event_type}`));
+    const methodDetails = el('details', 'guide-details');
+    methodDetails.append(el('summary', '', 'Как получен результат'));
     const modeLabels = {
       deterministic: "Объяснения составлены по правилам на основе данных каталога.",
       llm: "Формулировки объяснений подготовлены языковой моделью на основе профилей.",
@@ -457,10 +527,10 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     if (modeLabels[data.explanation_mode]) {
       const mode = el("p", "explanation-mode", modeLabels[data.explanation_mode]);
       mode.dataset.explanationMode = data.explanation_mode;
-      summary.append(mode);
+      methodDetails.append(mode);
     }
     if (data.status === "matched" && data.eligible_count > data.cards.length) {
-      summary.append(el("p", "ranking-note", "Первые три выбраны по совпадениям описания с форматом, затем с категорией. При равенстве — по меньшей цене «от»."));
+      methodDetails.append(el("p", "ranking-note", "Первые три выбраны по совпадениям описания с форматом, затем с категорией. При равенстве — по меньшей цене «от»."));
     }
     const nodes = [summary];
     const cards = data.cards.slice(0, 3);
@@ -473,7 +543,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
         const identity = el("div");
         identity.append(el("p", "card-category", card.category), el("h3", "", card.name), el("p", "card-city", card.city));
         const price = el("p", "card-price", `от ${money.format(card.price_from_kzt)} ₸`);
-        price.append(el("span", "price-note", "за мероприятие"));
+        price.append(el("span", "price-note", "начальная цена по каталогу"));
         top.append(identity, price);
         const explanation = el("div", "explanation");
         explanation.append(el("p", "explanation-label", "Почему подходит"), el("p", "", card.explanation));
@@ -504,15 +574,18 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       nodes.push(list);
     }
     const counts = el("p", "request-summary", `В этой категории и городе: ${data.total_in_city_category}. Подходят по условиям: ${data.eligible_count}. Показано: ${cards.length}.`);
-    nodes.push(counts);
+    methodDetails.append(counts);
     const exclusions = el("ul", "exclusion-list");
     for (const [key, label] of Object.entries(exclusionLabels)) {
       const count = data.exclusions?.[key];
       if (Number.isInteger(count) && count > 0) exclusions.append(el("li", "", `${label}: ${count}`));
     }
     if (exclusions.childElementCount) {
-      nodes.push(exclusions, el("p", "exclusion-note", "Один профиль может не подходить по нескольким причинам. Эти числа не складываются."));
+      const target = data.status === 'matched' ? methodDetails : el('div');
+      target.append(exclusions, el("p", "exclusion-note", "Один профиль может не подходить по нескольким причинам. Эти числа не складываются."));
+      if (data.status !== 'matched') nodes.push(target);
     }
+    nodes.push(methodDetails);
     if (data.status === "no_matches" && Array.isArray(data.suggestions)) {
       const suggestions = el("section", "suggestions");
       suggestions.setAttribute("aria-label", "Можно изменить условия");
@@ -537,6 +610,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
           if (Object.keys(current.errors).length || requestKeys.some(key => current.request[key] !== request[key])) return;
           for (const key of requestKeys) fields[key].input.value = suggestion.request[key] === null ? "" : String(suggestion.request[key]);
           dateText.value = displayDate(fields.event_date.input.value); updateBudget(); updateGuide();
+          for (const control of searchControls.values()) control.refresh();
           submit();
         });
         alternative.append(button);
@@ -546,6 +620,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       if (seen.size) nodes.push(suggestions);
     }
     output.replaceChildren(...nodes);
+    resultLink.hidden = false;
     refreshLanguage();
   }
 
@@ -589,8 +664,9 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     if (event.target === dateText) {
       const text = dateText.value.trim();
       const match = text.match(/^(\d{2})[./](\d{2})[./](\d{4})$/);
-      const date = match ? `${match[3]}-${match[2]}-${match[1]}` : text;
+      const date = match ? `${match[3]}-${match[2]}-${match[1]}` : /^\d{8}$/.test(text) ? `${text.slice(4)}-${text.slice(2, 4)}-${text.slice(0, 2)}` : text;
       fields.event_date.input.value = isISODate(date) ? date : '';
+      if (/^\d{8}$/.test(text) && fields.event_date.input.value) dateText.value = displayDate(date);
     } else if (event.target === fields.event_date.input) dateText.value = fields.event_date.input.value ? displayDate(fields.event_date.input.value) : '';
     if (event.target === fields.budget_kzt.input) updateBudget();
     if (['city', 'category', 'event_type'].includes(event.target.name)) { updateCategoryOptions(); updateFormatOptions(); }
@@ -624,6 +700,8 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       destroyed = true;
       clearTimeout(autoTimer);
       for (const control of searchControls.values()) control.destroy();
+      doc.removeEventListener('pointerdown', closeCalendarOutside);
+      doc.removeEventListener('focusin', closeCalendarOutside);
       ++generation;
       form.removeEventListener("submit", submit);
       form.removeEventListener("input", onInput);
@@ -633,6 +711,20 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
 }
 
 let mountSequence = 0;
+// Service labels only; canonical catalog categories and the API stay unchanged.
+const serviceLabels = {
+  'Ведущий':'Ведение мероприятия', 'Ведущий церемонии':'Проведение церемонии',
+  'Фотограф':'Фотосъёмка', 'Видеограф':'Видеосъёмка', 'Лайв-бэнд':'Живая музыка',
+  'Инструменталист':'Инструментальная музыка', 'Танцевальный коллектив':'Танцевальное шоу',
+  'Декоратор':'Декор мероприятия', 'Флорист':'Флористика',
+};
+const serviceGroups = [
+  ['Ведение и шоу', ['Ведущий', 'Ведущий церемонии', 'Танцевальный коллектив', 'Шоу-программа']],
+  ['Фото и видео', ['Фотограф', 'Видеограф', 'Фото и видеобудки']],
+  ['Музыка', ['Лайв-бэнд', 'Инструменталист', 'Национальный ансамбль']],
+  ['Площадки', ['Банкетный зал', 'Ресторан', 'Загородная площадка', 'Отель']],
+  ['Оформление и подарки', ['Декоратор', 'Флорист', 'Подарки и сувениры']],
+];
 const money = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 2 });
 const exclusionLabels = {
   busy: "Заняты на дату", budget: "Выше бюджета", event_type: "Другой формат",

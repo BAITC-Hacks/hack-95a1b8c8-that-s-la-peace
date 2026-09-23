@@ -1,185 +1,213 @@
-/**
- * Progressive search for a native select. The select remains the only form
- * value; filtering never selects a suggestion or emits input/change on it.
- * Call refresh() after rebuilding options from metadata. No network or styles.
- */
+/** Editable combobox backed by an unchanged native select. No network or styles. */
 export function enhanceSelect(select, {
   fieldLabel,
   placeholder = "Поиск в списке",
   emptyText = "Нет вариантов",
   allText = "Показать весь список",
   getSearchText = option => option.label,
+  getDisplayText = option => option.label,
+  getGroupText = group => group.label,
   onRender = () => {}
 } = {}) {
-  if (!select || select.tagName !== "SELECT" || !select.parentNode) {
-    throw new TypeError("enhanceSelect requires an attached native select");
+  if (!select || select.tagName !== "SELECT" || !select.parentNode || select.multiple) {
+    throw new TypeError("enhanceSelect requires an attached single native select");
   }
   if (instances.has(select)) return instances.get(select);
-  const doc = select.ownerDocument;
-  const uid = `select-search-${++sequence}`;
-  const assignedId = !select.id;
-  if (assignedId) select.id = `${uid}-select`;
-  const fieldName = fieldLabel || select.labels?.[0]?.textContent.trim() || select.getAttribute("aria-label") || select.name || "список";
-  const wrapper = doc.createElement("div");
-  wrapper.className = "select-search";
-  const label = doc.createElement("label");
-  label.className = "select-search-label";
-  label.htmlFor = `${uid}-input`;
-  label.textContent = `${placeholder}: ${fieldName}`;
-  const controls = doc.createElement("div");
-  controls.className = "select-search-controls";
-  const input = doc.createElement("input");
-  input.type = "search";
-  input.id = label.htmlFor;
-  input.className = "select-search-input";
-  input.placeholder = placeholder;
-  input.autocomplete = "off";
-  input.spellcheck = false;
-  input.setAttribute("aria-controls", select.id);
-  const allButton = doc.createElement("button");
-  allButton.type = "button";
-  allButton.className = "select-search-all";
-  allButton.textContent = allText;
-  allButton.setAttribute('aria-label', 'Показать весь список');
-  const status = doc.createElement("p");
-  status.id = `${uid}-status`;
-  status.className = "select-search-status";
-  status.setAttribute("role", "status");
-  status.setAttribute("aria-live", "polite");
-  status.setAttribute("aria-atomic", "true");
-  input.setAttribute("aria-describedby", status.id);
-  select.setAttribute("aria-describedby", [select.getAttribute("aria-describedby"), status.id].filter(Boolean).join(" "));
-  controls.append(input, allButton);
-  wrapper.append(label, controls, status);
-  select.before(wrapper);
+  const doc = select.ownerDocument, view = doc.defaultView;
+  const uid = `combobox-${++sequence}`;
+  const previous = {hidden: select.hidden, tabindex: select.getAttribute("tabindex")};
+  const labels = Array.from(select.labels || []);
+  const fieldName = fieldLabel || labels[0]?.textContent.trim() || select.getAttribute("aria-label") || select.name || "список";
+  const wrapper = doc.createElement("div"); wrapper.className = "select-combobox";
+  const control = doc.createElement("div"); control.className = "combobox-control";
+  const input = doc.createElement("input"); input.type = "text"; input.id = `${uid}-input`;
+  input.className = "combobox-input"; input.autocomplete = "off"; input.spellcheck = false;
+  input.setAttribute("role", "combobox"); input.setAttribute("aria-autocomplete", "list");
+  input.setAttribute("aria-haspopup", "listbox"); input.setAttribute("aria-controls", `${uid}-list`);
+  const toggle = doc.createElement("button"); toggle.type = "button"; toggle.tabIndex = -1;
+  toggle.className = "combobox-toggle"; toggle.setAttribute("aria-label", allText);
+  toggle.setAttribute("aria-controls", `${uid}-list`);
+  const arrow = doc.createElement("span"); arrow.textContent = "⌄"; arrow.setAttribute("aria-hidden", "true"); toggle.append(arrow);
+  const list = doc.createElement("div"); list.id = `${uid}-list`; list.className = "combobox-listbox";
+  list.setAttribute("role", "listbox"); list.setAttribute("aria-label", fieldName);
+  const status = doc.createElement("p"); status.id = `${uid}-status`; status.className = "combobox-status";
+  status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite");
+  control.append(input, toggle); wrapper.append(control, list, status); select.before(wrapper);
+  const relabelled = labels.filter(label => label.htmlFor === select.id && select.id);
+  for (const label of relabelled) label.htmlFor = input.id;
+  if (!relabelled.length) input.setAttribute("aria-label", fieldName);
+  select.hidden = true; select.tabIndex = -1;
 
-  let entries = [];
-  let options = [];
-  let renderedOptions = [];
-  let destroyed = false;
+  let opened = false, query = null, active = null, shown = [], destroyed = false, rendering = false, pointerInside = false, pointerOnly = false, touchStart = null, suppressClick = false;
+  const selectedOption = () => select.selectedOptions[0];
+  const disabledOption = option => option.disabled || (option.parentElement?.tagName === "OPTGROUP" && option.parentElement.disabled);
 
-  function captureOptions() {
-    entries = Array.from(select.children, node => ({
-      node,
-      children: node.tagName === "OPTGROUP" ? Array.from(node.children) : null
-    }));
-    options = Array.from(select.options);
-  }
-
-  function render(showAll = false) {
-    const selected = new Set(select.selectedOptions);
-    const query = showAll ? "" : normalize(input.value);
-    const matches = option => !query || normalize(getSearchText(option)).includes(query);
-    const visible = option => !option.value || selected.has(option) || matches(option);
-    const nodes = [];
-    for (const entry of entries) {
-      if (entry.children) {
-        const children = entry.children.filter(node => node.tagName !== "OPTION" || visible(node));
-        entry.node.replaceChildren(...children);
-        if (children.length) nodes.push(entry.node);
-      } else if (entry.node.tagName !== "OPTION" || visible(entry.node)) nodes.push(entry.node);
+  function mirrorState() {
+    const disabled = select.matches(":disabled");
+    input.disabled = disabled; toggle.disabled = disabled;
+    if (disabled) { opened = false; query = null; active = null; }
+    for (const name of ["aria-invalid", "aria-errormessage"]) {
+      if (select.hasAttribute(name)) input.setAttribute(name, select.getAttribute(name));
+      else input.removeAttribute(name);
     }
-    select.replaceChildren(...nodes);
-    // Insertion can make a native select choose its first option. Restore the
-    // exact previous selection, including selectedIndex=-1 and multiple values.
-    select.selectedIndex = -1;
-    for (const option of select.options) option.selected = selected.has(option);
-    renderedOptions = Array.from(select.options);
-    const count = options.filter(option => option.value && matches(option)).length;
-    const retained = query && Array.from(selected).some(option => option.value && !matches(option));
-    status.textContent = query
-      ? `${count ? `Найдено: ${count}. Выберите вариант в списке.` : `${emptyText}. Измените поиск или покажите весь список.`}${retained ? " Выбранное значение сохранено в списке." : ""}`
-      : `Вариантов в списке: ${count}. Поиск не меняет выбранное значение.`;
-    status.classList.toggle('is-empty-search', !query);
-    syncDisabled();
-    onRender();
+    input.setAttribute("aria-describedby", [select.getAttribute("aria-describedby"), status.id].filter(Boolean).join(" "));
+    input.setAttribute("aria-required", String(select.required));
   }
 
-  function syncDisabled() {
-    input.disabled = select.disabled;
-    allButton.disabled = select.disabled;
+  function render(notify = true) {
+    if (destroyed || rendering) return;
+    rendering = true;
+    try {
+      mirrorState();
+      const options = Array.from(select.options), selected = selectedOption();
+      const empty = options.find(option => !option.value);
+      input.placeholder = empty ? String(getDisplayText(empty)) : placeholder;
+      if (query === null) input.value = selected?.value ? String(getDisplayText(selected)) : "";
+      const needle = normalize(query || "");
+      shown = options.filter(option => !option.hidden && (!needle || normalize(getSearchText(option)).includes(needle)));
+      if (!shown.includes(active) || (active && disabledOption(active))) active = null;
+      list.replaceChildren();
+      let currentGroup = null;
+      for (const option of shown) {
+        const group = option.parentElement?.tagName === "OPTGROUP" ? option.parentElement : null;
+        if (group && group !== currentGroup) {
+          const heading = doc.createElement("div"); heading.className = "combobox-group";
+          heading.setAttribute("role", "presentation"); heading.textContent = String(getGroupText(group)); list.append(heading);
+        }
+        currentGroup = group;
+        const item = doc.createElement("div"); item.className = "combobox-option";
+        item.id = `${uid}-option-${options.indexOf(option)}`;
+        item.dataset.value = option.value; item.dataset.index = String(options.indexOf(option));
+        item.setAttribute("role", "option"); item.setAttribute("aria-selected", String(option.selected));
+        item.setAttribute("aria-disabled", String(Boolean(disabledOption(option))));
+        item.classList.toggle("is-active", option === active); item.textContent = String(getDisplayText(option));
+        list.append(item);
+      }
+      input.setAttribute("aria-expanded", String(opened)); toggle.setAttribute("aria-expanded", String(opened));
+      wrapper.dataset.open = String(opened); list.hidden = !opened;
+      if (opened && active) input.setAttribute("aria-activedescendant", `${uid}-option-${options.indexOf(active)}`);
+      else input.removeAttribute("aria-activedescendant");
+      status.textContent = opened && !shown.length ? emptyText : "";
+      status.hidden = !opened || shown.length > 0;
+      if (notify) onRender();
+    } finally { rendering = false; }
   }
 
-  function refresh() {
-    if (destroyed) return;
-    const current = Array.from(select.options);
-    // A refresh without an external rebuild must not forget filtered options.
-    if (current.length !== renderedOptions.length || current.some((option, index) => option !== renderedOptions[index])) captureOptions();
-    render();
+  function close() {
+    if (!opened && query === null && active === null) return;
+    opened = false; query = null; active = null; render();
   }
-
-  function onSearch(event) {
-    // The host form listens to input. Search text is not a changed API field.
-    event.stopPropagation();
-    render();
+  function open(selectText = true) {
+    if (destroyed || select.matches(":disabled")) return;
+    opened = true; query = null; active = null; render();
+    if (selectText && doc.activeElement === input) input.select();
   }
-
+  function commit(option) {
+    if (!option || !Array.from(select.options).includes(option) || disabledOption(option) || select.matches(":disabled")) return;
+    const changed = select.selectedIndex !== option.index;
+    select.selectedIndex = option.index;
+    if (pointerOnly) toggle.focus({preventScroll: true});
+    else input.focus({preventScroll: true});
+    close();
+    if (changed) {
+      // Only the canonical select bubbles to the form, once per committed
+      // change. Typing, filtering and cancelling never change API fields.
+      select.dispatchEvent(new view.Event("input", {bubbles: true}));
+      select.dispatchEvent(new view.Event("change", {bubbles: true}));
+    }
+  }
+  function onInput(event) {
+    event.stopPropagation(); query = input.value; opened = true; active = null; render();
+  }
   function stopChange(event) { event.stopPropagation(); }
-
-  function showAll() {
-    input.value = "";
-    render();
-    select.focus();
-  }
-
   function onKeydown(event) {
     if (event.isComposing) return;
-    if (event.key === "Enter" || event.key === "ArrowDown") {
-      event.preventDefault();
-      select.focus();
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      event.preventDefault(); event.stopPropagation();
+      if (!opened) { opened = true; query = null; render(); }
+      const choices = shown.filter(option => !disabledOption(option));
+      if (!choices.length) return;
+      const index = choices.indexOf(active), delta = event.key === "ArrowDown" ? 1 : -1;
+      active = choices[index < 0 ? (delta > 0 ? 0 : choices.length - 1) : Math.max(0, Math.min(choices.length - 1, index + delta))];
+      render(); doc.getElementById(input.getAttribute("aria-activedescendant"))?.scrollIntoView({block: "nearest"});
+    } else if (event.key === "Enter") {
+      event.preventDefault(); event.stopPropagation(); if (opened && active) commit(active);
     } else if (event.key === "Escape") {
-      event.preventDefault();
-      input.value = "";
-      render();
+      event.preventDefault(); event.stopPropagation(); close();
+    } else if (event.key === "Tab") close();
+  }
+  function onFocus() { pointerOnly = false; open(); }
+  function onClick() { if (!opened) open(); else if (query === null) input.select(); }
+  function onToggle() {
+    const shouldClose = opened && query === null;
+    pointerOnly = true;
+    if (doc.activeElement === input) input.blur();
+    if (shouldClose) close(); else open(false);
+  }
+  function onListClick(event) {
+    if (suppressClick) { suppressClick = false; event.preventDefault(); return; }
+    const item = event.target.closest(".combobox-option");
+    if (item && list.contains(item)) { event.preventDefault(); commit(select.options[Number(item.dataset.index)]); }
+  }
+  function onPointerDown(event) {
+    pointerInside = true;
+    suppressClick = false;
+    const option = event.target.closest(".combobox-option");
+    if (event.pointerType !== "mouse" && option && list.contains(option)) {
+      touchStart = {id: event.pointerId, x: event.clientX, y: event.clientY, index: Number(option.dataset.index), moved: false};
     }
+    if (event.pointerType === "mouse" && (list.contains(event.target) || toggle.contains(event.target))) event.preventDefault();
   }
-
-  function onSelection() { render(); }
-  function onReset() {
-    // Restore defaults to the DOM before the browser's native reset runs.
-    input.value = "";
-    render();
-    queueMicrotask(() => { if (!destroyed) render(); });
+  function onPointerMove(event) {
+    if (touchStart?.id === event.pointerId && (Math.abs(event.clientX - touchStart.x) > 10 || Math.abs(event.clientY - touchStart.y) > 10)) touchStart.moved = true;
   }
-
-  captureOptions();
-  render();
-  input.addEventListener("input", onSearch);
-  input.addEventListener("change", stopChange);
-  input.addEventListener("keydown", onKeydown);
-  allButton.addEventListener("click", showAll);
-  select.addEventListener("change", onSelection);
-  const form = select.form;
-  form?.addEventListener("reset", onReset);
-  const observer = new doc.defaultView.MutationObserver(syncDisabled);
-  observer.observe(select, {attributes: true, attributeFilter: ["disabled"]});
-
+  function onListUp(event) {
+    // A touch's compatibility mouse events can blur the input before click.
+    // Commit taps on pointerup; scrolling/cancelled gestures never commit.
+    if (touchStart?.id !== event.pointerId) return;
+    const touched = touchStart; touchStart = null; suppressClick = true;
+    if (!touched.moved) { event.preventDefault(); commit(select.options[touched.index]); }
+  }
+  function onDocumentDown(event) { if (!wrapper.contains(event.target)) close(); }
+  function onDocumentUp(event) {
+    if (event.type === "pointercancel" && touchStart) suppressClick = true;
+    pointerInside = false; touchStart = null;
+  }
+  function onBlur(event) { if (!pointerInside && !wrapper.contains(event.relatedTarget)) close(); }
+  function onNativeChange() { query = null; active = null; render(); }
+  function onReset() { queueMicrotask(() => {
+    if (!destroyed) { opened = false; query = null; active = null; render(); }
+  }); }
+  const observer = new view.MutationObserver(() => render(false));
+  observer.observe(select, {attributes: true, attributeFilter: ["disabled", "required", "aria-invalid", "aria-describedby", "aria-errormessage"]});
+  for (let parent = select.parentElement; parent; parent = parent.parentElement) {
+    if (parent.tagName === "FIELDSET") observer.observe(parent, {attributes: true, attributeFilter: ["disabled"]});
+  }
+  input.addEventListener("input", onInput); input.addEventListener("change", stopChange);
+  input.addEventListener("keydown", onKeydown); input.addEventListener("focus", onFocus); input.addEventListener("click", onClick);
+  toggle.addEventListener("click", onToggle); list.addEventListener("click", onListClick); list.addEventListener("pointerup", onListUp);
+  list.addEventListener("pointermove", onPointerMove);
+  wrapper.addEventListener("pointerdown", onPointerDown); wrapper.addEventListener("focusout", onBlur);
+  doc.addEventListener("pointerdown", onDocumentDown); doc.addEventListener("pointerup", onDocumentUp); doc.addEventListener("pointercancel", onDocumentUp);
+  select.addEventListener("input", onNativeChange); select.addEventListener("change", onNativeChange);
+  const form = select.form; form?.addEventListener("reset", onReset);
   const api = {
-    refresh,
+    refresh() { render(); },
+    refreshLanguage() { render(false); },
+    focus(options) { if (!destroyed) input.focus(options); },
     destroy() {
       if (destroyed) return;
-      refresh();
-      render(true);
-      destroyed = true;
-      observer.disconnect();
-      input.removeEventListener("input", onSearch);
-      input.removeEventListener("change", stopChange);
-      input.removeEventListener("keydown", onKeydown);
-      allButton.removeEventListener("click", showAll);
-      select.removeEventListener("change", onSelection);
-      form?.removeEventListener("reset", onReset);
-      wrapper.remove();
-      const describedBy = (select.getAttribute("aria-describedby") || "").split(/\s+/).filter(id => id && id !== status.id).join(" ");
-      if (describedBy) select.setAttribute("aria-describedby", describedBy);
-      else select.removeAttribute("aria-describedby");
-      if (assignedId && select.id === `${uid}-select`) select.removeAttribute("id");
+      destroyed = true; observer.disconnect();
+      doc.removeEventListener("pointerdown", onDocumentDown); doc.removeEventListener("pointerup", onDocumentUp); doc.removeEventListener("pointercancel", onDocumentUp);
+      select.removeEventListener("input", onNativeChange); select.removeEventListener("change", onNativeChange); form?.removeEventListener("reset", onReset);
+      wrapper.remove(); select.hidden = previous.hidden;
+      if (previous.tabindex === null) select.removeAttribute("tabindex"); else select.setAttribute("tabindex", previous.tabindex);
+      for (const label of relabelled) if (label.htmlFor === input.id) label.htmlFor = select.id;
       instances.delete(select);
     }
   };
-  instances.set(select, api);
-  return api;
+  instances.set(select, api); render(); return api;
 }
-
 const instances = new WeakMap();
 let sequence = 0;
 function normalize(value) { return String(value).normalize("NFKC").toLocaleLowerCase("ru-RU").replace(/ё/g, "е").trim(); }
