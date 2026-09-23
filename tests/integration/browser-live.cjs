@@ -76,7 +76,16 @@ const baseQuery = {
       assert.equal(card.source, 'provided');
       assert.ok(card.explanation.trim());
       assert.ok(card.description_excerpt.trim());
-      assert.ok(card.explanation.includes(card.description_excerpt));
+      if (card.explanation.includes('Из описания:')) {
+        assert.ok(card.explanation.includes(card.description_excerpt), 'Quoted reason must preserve the source excerpt.');
+      } else {
+        const presence = card.max_hours === null
+          ? 'работа не привязана к присутствию по часам'
+          : `на площадке до ${card.max_hours} ч`;
+        assert.ok(card.explanation.includes(`В профиле: языки — ${card.languages.join(', ')}; ${presence}`),
+          'Sparse descriptions must use actual structured facts, not a fabricated quote.');
+      }
+      assert.equal(await domCards.nth(index).locator('.profile-excerpt > p').textContent(), card.description_excerpt);
       const text = await domCards.nth(index).innerText();
       assert.ok(text.includes(card.name), 'Source name must be visible.');
       assert.ok(text.includes(card.explanation), 'The full server explanation must be visible.');
@@ -204,6 +213,20 @@ const baseQuery = {
     assert.ok(bands.cards[1].description_excerpt.includes('4 вокалиста'));
     assert.ok(bands.cards[1].description_excerpt.includes('струнный квартет'));
     assert.ok(bands.cards.every(c => !c.description_excerpt.includes('идеально впишется')));
+
+    const lineupResponse = await submit('B01 complete lineup and qualified starting price', {...baseQuery,
+      category: 'Лайв-бэнд', event_date: '2026-10-16', budget_kzt: 1150000});
+    const lineup = lineupResponse.cards.find(card => card.id === 'HK-31819');
+    assert.ok(lineup);
+    assert.ok(lineup.description_excerpt.startsWith('Большой состав'));
+    assert.ok(!lineup.description_excerpt.includes('Репертуар: от'));
+    assert.ok(lineup.explanation.includes('стоимость этого состава нужно уточнить'));
+    const sparseResponse = await submit('B02 factual reason instead of advertising', {...baseQuery,
+      category: 'Лайв-бэнд', event_date: '2026-10-17', budget_kzt: 1500000});
+    const sparse = sparseResponse.cards.find(card => card.id === 'HK-25279');
+    assert.ok(sparse);
+    assert.ok(!sparse.explanation.includes('сверкаем'));
+    assert.ok(sparse.explanation.includes('В профиле: языки — русский; на площадке до 5 ч'));
 
     const venueQuery = {...baseQuery, category: 'Банкетный зал', event_date: '2026-11-14', budget_kzt: 6000000};
     const venues = await submit('venue calendar November 14', venueQuery);
