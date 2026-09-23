@@ -67,6 +67,7 @@ h2 { font-size: 23px; line-height: 1.25; font-weight: 600; letter-spacing: -.025
 .results-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 0 0 18px; min-height: 42px; padding-top: 3px; }
 .results-heading h2 { font-size: 17px; }
 .results-meta { color: var(--muted); font-size: 11px; }
+.catalog-notice { color: var(--muted); font-size: 12px; line-height: 1.5; margin: -8px 0 18px; }
 .result-state { border: 1px solid var(--line); border-radius: 18px; background: #eeefe3; min-height: 418px; padding: 40px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; overflow: hidden; position: relative; }
 .state-graphic { width: 72px; height: 72px; border: 1px solid #a9b69a; border-radius: 50%; margin-bottom: 26px; display: grid; place-items: center; position: relative; }
 .state-graphic::before, .state-graphic::after { content: ""; width: 25px; height: 25px; border: 1px solid #78916b; border-radius: 50%; position: absolute; }
@@ -104,6 +105,7 @@ h2 { font-size: 23px; line-height: 1.25; font-weight: 600; letter-spacing: -.025
 .profile-excerpt summary { cursor: pointer; width: fit-content; }
 .profile-excerpt p { border-left: 2px solid #cfd9c6; margin: 10px 0 0; padding: 2px 0 2px 12px; font-size: 12px; line-height: 1.75; white-space: pre-line; overflow-wrap: anywhere; color: #626d5b; }
 .results-summary .explanation-mode { margin-top: 10px; font-size: 10px; line-height: 1.7; color: #64705e; }
+.results-summary .ranking-note { margin-top: 8px; font-size: 12px; }
 .results-summary [data-explanation-mode="deterministic_fallback"] { color: #795d30; }
 .suggestions { margin-top: 24px; padding: 22px; border: 1px solid #d3dcc9; border-radius: 15px; background: #f0f2e8; }
 .suggestions h3 { margin: 0; font-size: 17px; font-weight: 600; }
