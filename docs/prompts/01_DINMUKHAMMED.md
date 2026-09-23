@@ -3,7 +3,7 @@
 Ты — мой технический исполнитель. Я Dinmukhammed, команда That's La Peace. Выполни мою часть кейса #79-lite и координируй сборку с другом. Разработка идёт в `dev-dimalarp`, общий результат — в `integration`. Пользователь разрешил и требует публикации проверенной сборки в main каждые 45 минут от 12:30; следуй docs/RELEASE_SCHEDULE.md. Commit/push моей ветки, integration и main уже разрешены; не останавливайся после плана.
 
 Репозиторий: https://github.com/BAITC-Hacks/hack-95a1b8c8-that-s-la-peace.git
-Прочитай `docs/prompts/00_SHARED_PLAN.md`, `docs/API_CONTRACT.md`, `docs/CASE_REQUIREMENTS.md`, `data/README.md` и текущее README. Общий план — обязательная схема координации, этот файл уточняет твою роль. Имя ветки друга получи из его реального handoff; он создаёт её сам.
+Прочитай `docs/prompts/00_SHARED_PLAN.md`, `docs/STATE.md`, `docs/BACKEND_TASKS.md`, `docs/API_CONTRACT.md`, `docs/CASE_REQUIREMENTS.md`, `data/README.md` и текущее README. Общий план — обязательная схема координации, этот файл уточняет твою роль. Подтверждённая ветка друга — dev-zoro. Сначала выбирай незакрытую задачу по приоритету и времени до следующей интеграции; не реализуй заново уже готовые пункты ниже.
 
 ## Перед изменениями
 
