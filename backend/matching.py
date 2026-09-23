@@ -106,6 +106,11 @@ _BLOCK_HEADER = re.compile(
 )
 
 
+def _photography_approach(text: str) -> bool:
+    """Recognize an explicit source contrast without strengthening its meaning."""
+    return bool(re.search(r"кадр\w*.*не про поз\w*.*а про", text.casefold()))
+
+
 def _description_evidence(text: str) -> tuple[int, bool]:
     """A conservative factual signal, not a claim that source prose is verified."""
     lowered = text.casefold().replace("ё", "е")
@@ -117,7 +122,7 @@ def _description_evidence(text: str) -> tuple[int, bool]:
         r"идеальн\w*|отличн\w*\s+выбор|любой\s+формат|"
         r"незабываем\w*|сверкаем|безумн\w*\s+энергетик\w*", lowered,
     ))
-    specificity = _overlap(text, _SPECIFIC_STEMS) + 2 * int(quantified)
+    specificity = _overlap(text, _SPECIFIC_STEMS) + 2 * int(quantified) + 2 * int(_photography_approach(text))
     usable = specificity > 0 and (not promotional or quantified)
     return specificity, usable
 
@@ -179,7 +184,9 @@ def _select_excerpt(profile: dict[str, Any], request: dict[str, Any]) -> tuple[s
             part.casefold(),
         ))
         return (
-            int(complete and usable), int(complete), _overlap(part, stems), specificity,
+            int(complete and usable), int(complete),
+            int(request["category"] == "Фотограф" and _photography_approach(part)),
+            _overlap(part, stems), specificity,
             -int(introduction), _overlap(part, category),
         )
 
@@ -197,6 +204,72 @@ def _money(amount: int) -> str:
     return f"{amount:,}".replace(",", " ")
 
 
+def _join_facts(values: list[str]) -> str:
+    return ", ".join(values[:-1]) + " и " + values[-1] if len(values) > 1 else values[0]
+
+
+def _lineup_summary(excerpt: str) -> str | None:
+    """Summarize a complete named lineup, retaining all qualifications verbatim otherwise."""
+    header = _BLOCK_HEADER.match(excerpt)
+    if not header:
+        return None
+    heading = header.group(0).casefold()
+    kind = re.match(r"(расширенный|большой)\b", heading)
+    if not kind or "состав" not in heading:
+        return None
+    lowered = excerpt.casefold().replace("ё", "е")
+    # Do not turn exclusions, conditions, or a separately stated price into
+    # positive inclusions or a claim that price information is absent.
+    if re.search(r"\b(?:не|без|только|кроме|если|при|по запросу)\b|доплат|отдельн|₸|тенге|стоим|цен[аыу]", lowered):
+        return None
+    facts: list[str] = []
+    vocalists = re.search(r"(\d+|два|три|четыре)\s+(?:профессиональн\w*\s+)?вокалист(?:а|ов)?\b", lowered)
+    if vocalists:
+        vocal = f"{vocalists.group(1)} вокалиста" if vocalists.group(1) in {"2", "3", "4", "два", "три", "четыре"} else f"{vocalists.group(1)} вокалистов"
+        if re.search(r"\bвокалистка\b", lowered):
+            vocal += " и вокалистка"
+        facts.append(vocal)
+    if re.search(r"струнн\w*\s+квартет", lowered):
+        facts.append("струнный квартет")
+    for pattern, label in (
+        (r"гитар", "гитары"), (r"барабан|перкусс", "ударные"),
+        (r"труба|саксофон|тромбон|брасс", "духовые"),
+        (r"клавиш", "клавишные"), (r"звукорежиссер", "звукорежиссёр"),
+    ):
+        if re.search(pattern, lowered):
+            facts.append(label)
+    if not vocalists or len(facts) < 3:
+        return None
+    adjective = kind.group(1)
+    summary = f"По описанию, {adjective} состав: {_join_facts(facts)}"
+    repertoire: list[str] = []
+    for pattern, label in (
+        (r"ретро[- ]хит", "ретро-хиты"),
+        (r"современн\w*\s+(?:композиц|хит|трек)", "современные композиции"),
+        (r"казахск\w*\s+(?:музык|пес)", "казахская музыка"),
+    ):
+        if re.search(pattern, lowered):
+            repertoire.append(label)
+    if repertoire:
+        summary += f"; репертуар — {_join_facts(repertoire)}"
+    genitive = "расширенного" if adjective == "расширенный" else "большого"
+    return summary + f"; стоимость {genitive} состава отдельно не указана, её нужно уточнить"
+
+
+def _only_intro_and_promotion(description: str) -> bool:
+    """Claim sparse data only when the entire description is demonstrably generic."""
+    if _description_evidence(description)[1] or re.search(
+        r"\d|работ|исполня|снима|фотограф|репертуар|состав|язык|опыт|площад|оборуд", description.casefold()
+    ):
+        return False
+    blocks = _source_blocks(description)
+    return bool(blocks) and all(
+        re.match(r"^(?:мы|я)\s*[—–-]", block.casefold())
+        or re.search(r"сверкаем|идеальн|незабываем|прекрасн\w*\s+атмосфер", block.casefold())
+        for block in blocks
+    )
+
+
 def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
     excerpt, complete = _select_excerpt(profile, request)
     details = [
@@ -207,13 +280,19 @@ def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
         details.append(f"язык — {request['language']}")
     if request.get("duration_hours") is not None:
         if profile["max_hours"] is None:
-            details.append("присутствие по часам неприменимо")
+            details.append(
+                "Для флориста ограничение по длительности присутствия не применяется"
+                if request["category"] == "Флорист" else "присутствие по часам неприменимо"
+            )
         else:
             details.append(f"{request['duration_hours']:g} ч при лимите {profile['max_hours']} ч")
     if complete and _description_evidence(excerpt)[1]:
         evidence = f"Из описания: «{excerpt}»"
+        summarized = _lineup_summary(excerpt)
         header = _BLOCK_HEADER.match(excerpt)
-        if header:
+        if summarized:
+            evidence = summarized
+        elif header:
             # Catalog price is a starting price, not the quoted lineup/package.
             heading = header.group(0).casefold()
             if re.search(r"\bсостав\b", heading):
@@ -229,6 +308,8 @@ def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
             else "работа не привязана к присутствию по часам"
         )
         evidence = f"В профиле: языки — {languages}; {presence}"
+        if _only_intro_and_promotion(profile["description"]):
+            evidence += "; других конкретных характеристик в описании нет"
     explanation = "; ".join(details) + f". {evidence}."
     return {
         "id": profile["id"],

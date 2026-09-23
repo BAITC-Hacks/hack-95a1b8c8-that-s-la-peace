@@ -76,15 +76,15 @@ const baseQuery = {
       assert.equal(card.source, 'provided');
       assert.ok(card.explanation.trim());
       assert.ok(card.description_excerpt.trim());
-      if (card.explanation.includes('Из описания:')) {
-        assert.ok(card.explanation.includes(card.description_excerpt), 'Quoted reason must preserve the source excerpt.');
-      } else {
-        const presence = card.max_hours === null
-          ? 'работа не привязана к присутствию по часам'
-          : `на площадке до ${card.max_hours} ч`;
-        assert.ok(card.explanation.includes(`В профиле: языки — ${card.languages.join(', ')}; ${presence}`),
-          'Sparse descriptions must use actual structured facts, not a fabricated quote.');
+      // Explanation and source excerpt are separate API fields. Human-approved
+      // summaries are checked by the B03 scenarios below and backend regressions.
+      if (card.explanation.includes('Из описания: «')) {
+        assert.ok(card.explanation.includes(card.description_excerpt), 'A source quotation must remain exact.');
       }
+      const sentences = card.explanation.match(/[.!?](?=\s|$)/g) || [];
+      assert.ok(sentences.length >= 1 && sentences.length <= 2, 'An explanation must use one or two sentences.');
+      const sourcePrice = String(card.price_from_kzt).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+      assert.ok(card.explanation.includes(`от ${sourcePrice} ₸`), 'The explanation must retain the actual starting price.');
       assert.equal(await domCards.nth(index).locator('.profile-excerpt > p').textContent(), card.description_excerpt);
       const text = await domCards.nth(index).innerText();
       assert.ok(text.includes(card.name), 'Source name must be visible.');
@@ -214,19 +214,65 @@ const baseQuery = {
     assert.ok(bands.cards[1].description_excerpt.includes('струнный квартет'));
     assert.ok(bands.cards.every(c => !c.description_excerpt.includes('идеально впишется')));
 
+    const photographers = await submit('B03 photographer has a source-backed individual approach', {...baseQuery,
+      category: 'Фотограф', event_type: 'свадьба'});
+    const photographer = photographers.cards.find(card => card.id === 'HK-91112');
+    const otherPhotographer = photographers.cards.find(card => card.id === 'HK-76268');
+    assert.ok(photographer && otherPhotographer);
+    assert.match(photographer.explanation, /поз/);
+    assert.match(photographer.explanation, /состояни/);
+    assert.doesNotMatch(photographer.explanation, /без позирования|без постановки|только репортаж/i);
+    assert.notEqual(photographer.explanation.split('. ').slice(1).join('. '),
+      otherPhotographer.explanation.split('. ').slice(1).join('. '), 'Photographers must differ beyond their starting prices.');
+
+    const expandedResponse = await submit('B03 expanded ensemble is concise and price-qualified', {...baseQuery,
+      category: 'Лайв-бэнд', budget_kzt: 1500000});
+    const expanded = expandedResponse.cards.find(card => card.id === 'HK-23752');
+    assert.ok(expanded);
+    assert.match(expanded.explanation, /расширенн/i);
+    assert.match(expanded.explanation, /(?:два|2) вокалиста/);
+    assert.match(expanded.explanation, /вокалистк/);
+    assert.match(expanded.explanation, /ретро/);
+    assert.match(expanded.explanation, /современн/);
+    assert.match(expanded.explanation, /казахск/);
+    assert.match(expanded.explanation, /стоимость расширенного состава/);
+    assert.match(expanded.explanation, /не (?:подтверждена|указана)/);
+    assert.match(expanded.explanation, /уточнить/);
+    assert.doesNotMatch(expanded.explanation, /[🎤🥁🎸🎺🎷🎵]/u);
+    assert.ok(expanded.explanation.length < 420, 'Expanded ensemble explanation must be shorter than the reviewed list.');
+
     const lineupResponse = await submit('B01 complete lineup and qualified starting price', {...baseQuery,
       category: 'Лайв-бэнд', event_date: '2026-10-16', budget_kzt: 1150000});
     const lineup = lineupResponse.cards.find(card => card.id === 'HK-31819');
     assert.ok(lineup);
     assert.ok(lineup.description_excerpt.startsWith('Большой состав'));
     assert.ok(!lineup.description_excerpt.includes('Репертуар: от'));
-    assert.ok(lineup.explanation.includes('стоимость этого состава нужно уточнить'));
+    assert.match(lineup.explanation, /стоимость большого состава.*уточнить/);
+    assert.match(lineup.explanation, /(?:4|четыре)(?: профессиональных)? вокалиста/);
+    assert.match(lineup.explanation, /струнный квартет/);
+    assert.match(lineup.explanation, /духов/);
+    assert.match(lineup.explanation, /звукорежисс/);
+    assert.doesNotMatch(lineup.explanation, /[🎤🥁🎸🎺🎷🎵🎻🔉]/u);
+    assert.ok(lineup.explanation.length < 370, 'Large ensemble explanation must be compact.');
     const sparseResponse = await submit('B02 factual reason instead of advertising', {...baseQuery,
       category: 'Лайв-бэнд', event_date: '2026-10-17', budget_kzt: 1500000});
     const sparse = sparseResponse.cards.find(card => card.id === 'HK-25279');
     assert.ok(sparse);
     assert.ok(!sparse.explanation.includes('сверкаем'));
-    assert.ok(sparse.explanation.includes('В профиле: языки — русский; на площадке до 5 ч'));
+    assert.match(sparse.explanation, /русский/);
+    assert.match(sparse.explanation, /до 5 ч/);
+    assert.match(sparse.explanation, /от 800 000 ₸/);
+    assert.match(sparse.explanation, /конкретн[^.]{0,35}характеристик/);
+    assert.match(sparse.explanation, /нет|не содержит/);
+
+    const floristResponse = await submit('B03 florist duration copy keeps null-hour semantics', {...baseQuery,
+      category: 'Флорист', event_type: 'свадьба', duration_hours: 24});
+    const florist = floristResponse.cards.find(card => card.id === 'HK-90001');
+    assert.ok(florist);
+    assert.equal(florist.max_hours, null);
+    assert.ok(florist.explanation.includes('Для флориста ограничение по длительности присутствия не применяется'));
+    assert.ok(!florist.explanation.includes('присутствие по часам неприменимо'));
+    assert.ok(!florist.explanation.includes('24 ч при'));
 
     const venueQuery = {...baseQuery, category: 'Банкетный зал', event_date: '2026-11-14', budget_kzt: 6000000};
     const venues = await submit('venue calendar November 14', venueQuery);
