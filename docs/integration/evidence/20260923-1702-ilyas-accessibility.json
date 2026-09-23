@@ -1,0 +1,283 @@
+{
+  "started_at": "2026-09-23T12:01:48.831Z",
+  "base_url": "http://127.0.0.1:8016",
+  "declared_checkout": "393a99b plus frozen frontend view/i18n/styles changes (provided by root; not independently verified via Git)",
+  "scope": "Agent technical accessibility/reflow check, real API; no fixtures or substituted responses",
+  "limitations": [
+    "No screen-reader run",
+    "No human usability acceptance",
+    "200% is a 690 CSS-pixel viewport reflow approximation of a 1380px display, not actual browser zoom"
+  ],
+  "checks": [
+    {
+      "name": "Full keyboard-only form path and real three-card result",
+      "status": "PASS",
+      "evidence": {
+        "request": {
+          "city": "Алматы",
+          "event_date": "2026-10-15",
+          "event_type": "корпоратив",
+          "category": "Ведущий",
+          "budget_kzt": 1000000,
+          "duration_hours": null,
+          "language": null
+        },
+        "http_status": 200,
+        "eligible_count": 6,
+        "visible_ids": [
+          "HK-44733",
+          "HK-44923",
+          "HK-77838"
+        ],
+        "mouse_actions": 0
+      }
+    },
+    {
+      "name": "Guide precedes budget; one visible date; result link follows explicit focus and clears on edit",
+      "status": "PASS",
+      "evidence": {
+        "guideBeforeBudget": true,
+        "guideBottom": 398.90625,
+        "budgetTop": 414.90625,
+        "matchedLinkFocus": true,
+        "emptyLinkFocus": true,
+        "linkHiddenAfterEdit": true,
+        "visibleDateInputs": 1
+      }
+    },
+    {
+      "name": "320 CSS px: form and real result",
+      "status": "PASS",
+      "evidence": {
+        "viewport": 320,
+        "document": 320,
+        "body": 320,
+        "overflowing": [],
+        "explanations": [
+          {
+            "scrollWidth": 244,
+            "clientWidth": 244,
+            "scrollHeight": 196,
+            "clientHeight": 196,
+            "lineClamp": "none"
+          },
+          {
+            "scrollWidth": 244,
+            "clientWidth": 244,
+            "scrollHeight": 252,
+            "clientHeight": 252,
+            "lineClamp": "none"
+          },
+          {
+            "scrollWidth": 244,
+            "clientWidth": 244,
+            "scrollHeight": 280,
+            "clientHeight": 280,
+            "lineClamp": "none"
+          }
+        ]
+      }
+    },
+    {
+      "name": "320 CSS px: expanded category combobox",
+      "status": "PASS",
+      "evidence": {
+        "viewport": 320,
+        "document": 320,
+        "body": 320,
+        "overflowing": []
+      }
+    },
+    {
+      "name": "320 CSS px: expanded calendar",
+      "status": "PASS",
+      "evidence": {
+        "viewport": 320,
+        "document": 320,
+        "body": 320,
+        "overflowing": []
+      }
+    },
+    {
+      "name": "200% reflow approximation: 1380px display represented by 690 CSS px",
+      "status": "PASS",
+      "evidence": {
+        "viewport": 690,
+        "document": 690,
+        "body": 690,
+        "overflowing": [],
+        "method": "viewport width 690 = 1380 / 2; viewport height 475 = 950 / 2. No browser zoom command and no claim of actual optical zoom."
+      }
+    },
+    {
+      "name": "RU/KK/EN: 320px, canonical selection, exact price notes and readable calendar",
+      "status": "PASS",
+      "evidence": [
+        {
+          "locale": "kk",
+          "price_note": "каталогтағы бастапқы баға",
+          "calendar_labels": {
+            "month": "2026 ж. қазан",
+            "weekdays": [
+              "Дс",
+              "Сс",
+              "Ср",
+              "Бс",
+              "Жм",
+              "Сб",
+              "Жс"
+            ]
+          },
+          "viewport": 320,
+          "document": 320,
+          "body": 320,
+          "overflowing": []
+        },
+        {
+          "locale": "en",
+          "price_note": "starting catalog price",
+          "calendar_labels": null,
+          "viewport": 320,
+          "document": 320,
+          "body": 320,
+          "overflowing": []
+        },
+        {
+          "locale": "ru",
+          "price_note": "начальная цена по каталогу",
+          "calendar_labels": null,
+          "viewport": 320,
+          "document": 320,
+          "body": 320,
+          "overflowing": []
+        }
+      ]
+    },
+    {
+      "name": "Keyboard submit focuses first invalid visible field",
+      "status": "PASS",
+      "evidence": {
+        "first_invalid": "city combobox",
+        "visible_error_count": 5
+      }
+    },
+    {
+      "name": "No browser runtime errors",
+      "status": "PASS"
+    }
+  ],
+  "keyboard_trace": [
+    {
+      "tag": "SUMMARY",
+      "id": "",
+      "role": null,
+      "text": "Настройки подбора"
+    },
+    {
+      "tag": "INPUT",
+      "id": "",
+      "role": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "combobox-1-input",
+      "role": "combobox",
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "combobox-1-input",
+      "role": "combobox",
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "picker-1-date-text",
+      "role": null,
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "combobox-2-input",
+      "role": "combobox",
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "combobox-3-input",
+      "role": "combobox",
+      "text": ""
+    },
+    {
+      "tag": "INPUT",
+      "id": "picker-1-budget_kzt",
+      "role": null,
+      "text": ""
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "role": null,
+      "text": "Подобрать варианты→"
+    },
+    {
+      "tag": "BUTTON",
+      "id": "",
+      "role": null,
+      "text": "Подобрать варианты→"
+    }
+  ],
+  "page_errors": [],
+  "screenshots": [
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\keyboard-real-result-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-form-results-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-category-list-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-calendar-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\200pct-equivalent-690css-calendar-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\200pct-equivalent-690css-list-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-kk-calendar-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-en-calendar-final.png",
+    "D:\\HackAlem AI\\worktrees\\ui-compact-tests\\tmp\\audit-accessibility\\320-ru-calendar-final.png"
+  ],
+  "browser": "153.0.4234.48",
+  "assets_before": {
+    "view.mjs": "8469b6c180be77c79858d8bd645a22f537d70c9b340c6accd7e6ddd5db7b198d",
+    "search-select.mjs": "1506d203dde11db44756b52e7dfe33a7e0ce127451f2086bcf41a9f8f0caf8f9",
+    "styles.css": "2fa8868f0381b44940df62a4a4d2ac8d0cec2eb698fe4556c1ecdba1ddabbee3",
+    "i18n.mjs": "77d87d59c33514b27986efcc7acdb505f107991ff01daebd7e798c3f12f33e76"
+  },
+  "assets_after": {
+    "view.mjs": "8469b6c180be77c79858d8bd645a22f537d70c9b340c6accd7e6ddd5db7b198d",
+    "search-select.mjs": "1506d203dde11db44756b52e7dfe33a7e0ce127451f2086bcf41a9f8f0caf8f9",
+    "styles.css": "2fa8868f0381b44940df62a4a4d2ac8d0cec2eb698fe4556c1ecdba1ddabbee3",
+    "i18n.mjs": "77d87d59c33514b27986efcc7acdb505f107991ff01daebd7e798c3f12f33e76"
+  },
+  "completed_at": "2026-09-23T12:01:53.317Z",
+  "status": "PASS",
+  "visual_review": {
+    "reviewer": "Codex agent; not human usability acceptance",
+    "status": "PASS",
+    "screenshots_reviewed": [
+      "keyboard-real-result-final.png",
+      "320-kk-calendar-final.png",
+      "320-en-calendar-final.png",
+      "200pct-equivalent-690css-list-final.png"
+    ],
+    "observations": [
+      "Kazakh calendar month and weekdays are readable, exact labels verified by DOM assertions",
+      "Catalog starting-price notes wrap without horizontal overflow",
+      "Guide is before the budget field; caveat remains visible",
+      "Explicit result link is visible after actual results; exact focus and edit hiding verified by automated checks",
+      "No new overlap or clipped explanations observed in reviewed screenshots"
+    ],
+    "resolved_findings": [
+      {
+        "id": "KK-CALENDAR-LABELS",
+        "previous_report": "report.json",
+        "status": "PASS",
+        "evidence": "320-kk-calendar-final.png and exact month/weekday DOM assertions"
+      }
+    ]
+  }
+}
