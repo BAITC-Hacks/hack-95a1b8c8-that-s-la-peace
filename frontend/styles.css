@@ -316,6 +316,7 @@ h1 { font-size: clamp(32px, 3.3vw, 44px); line-height: 1.15; letter-spacing: -.0
   .calendar-weekdays, .calendar-days { gap: 2px; }
   .date-calendar .field-hint { padding-inline: 8px; }
 }
+
 @media (max-width: 480px) {
   .site-header { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 10px; padding: 14px 0; }
   .brand { font-size: 18px; gap: 8px; }
@@ -330,4 +331,39 @@ h1 { font-size: clamp(32px, 3.3vw, 44px); line-height: 1.15; letter-spacing: -.0
   .calendar-heading { padding-inline: 8px; }
   .calendar-weekdays, .calendar-days { gap: 2px; }
   .date-calendar .field-hint { padding-inline: 8px; }
+}
+
+/* Final visual polish: shorter introduction, clearer facts, unchanged controls. */
+.brief-panel > h2 { margin-bottom: 6px; }
+.form-search-hint { margin: 0 0 18px; color: var(--muted); font-size: 14px; line-height: 1.5; }
+.contractor-card { padding: 20px; }
+.card-category { margin-bottom: 5px; }
+.contractor-card h3 { font-size: 22px; font-weight: 650; line-height: 1.3; }
+.card-city { margin-top: 4px; }
+.card-price { font-size: 20px; font-weight: 650; line-height: 1.35; font-variant-numeric: tabular-nums; }
+.price-note { margin-top: 4px; font-size: 13px; line-height: 1.45; }
+.explanation { margin-top: 16px; padding: 15px; border: 1px solid #dce5d9; border-radius: 10px; background: #f2f6ee; }
+.explanation p:last-child { line-height: 1.6; }
+.explanation-context { display: block; color: var(--muted); font-size: 14px; line-height: 1.55; }
+.explanation-detail { display: block; margin-top: 12px; padding-top: 10px; border-top: 1px solid #dce5d9; color: var(--ink); font-size: 16px; line-height: 1.6; }
+.profile-facts { margin-top: 12px; padding-top: 0; gap: 8px; }
+.profile-facts p { padding: 5px 9px; border-radius: 6px; background: #f5f3ed; color: var(--muted); }
+.profile-excerpt { margin-top: 6px; }
+.data-flags { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.card-price { padding: 10px 12px; border-radius: 9px; background: #f5f3ed; }
+.price-guide-main { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px solid #d5cede; }
+.price-guide-main h3 { color: #514661; font-size: 14px; font-weight: 500; }
+.price-guide .guide-price { margin-top: 2px; color: #40364e; font-size: 25px; font-weight: 700; letter-spacing: -.02em; }
+@media (max-width: 480px) {
+  .site-header { min-height: 72px; padding-block: 10px; gap: 6px 10px; }
+  .header-note, .eyebrow { display: none; }
+  .brand { font-size: 16px; line-height: 1.3; letter-spacing: -.3px; }
+  .brand > span:last-child { min-width: 0; overflow-wrap: anywhere; }
+  .intro { padding-top: 18px; padding-bottom: 18px; gap: 10px; }
+  h1 { font-size: 32px; line-height: 1.15; }
+  .intro-copy { font-size: 16px; line-height: 1.5; }
+  .brief-panel { padding-top: 18px; padding-bottom: 18px; }
+  .contractor-card { padding: 18px; }
+  .card-top { gap: 8px; }
+  .explanation { margin-top: 14px; padding: 12px; }
 }

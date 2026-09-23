@@ -1,8 +1,9 @@
 // Interface translations only. Original profile texts and server explanations
 // are deliberately kept in their source language and marked in the UI.
 const phrases = {
-  'Умный подбор подрядчиков': ['Мердігерлерді ақылды іріктеу', 'Smart contractor matching'],
-  'Умный подбор подрядчиков · HackAlem AI · 2026': ['Мердігерлерді ақылды іріктеу · HackAlem AI · 2026', 'Smart contractor matching · HackAlem AI · 2026'],
+  'В списках можно печатать, чтобы найти нужное.': ['Қажеттісін табу үшін тізімдерде теруге болады.', 'Type in the lists to find what you need.'],
+  "That's La Peace": ["That's La Peace", "That's La Peace"],
+  "That's La Peace · HackAlem AI · 2026": ["That's La Peace · HackAlem AI · 2026", "That's La Peace · HackAlem AI · 2026"],
   'Какая услуга нужна': ['Қандай қызмет қажет', 'What service do you need'],
   'Выберите услугу': ['Қызметті таңдаңыз', 'Choose a service'],
   'Ведение мероприятия': ['Іс-шараны жүргізу', 'Event hosting'],

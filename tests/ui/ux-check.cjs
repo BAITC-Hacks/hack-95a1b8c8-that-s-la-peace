@@ -107,6 +107,7 @@ async function bounded(promise, ms=12000) {
       assert.match(await page.locator('.guide-count').textContent(),/9/);
       await page.getByLabel('Дата события',{exact:true}).fill('15.10.2026');
       assert.match(await page.locator('.guide-count').textContent(),/7.*9/);
+      assert.equal((await page.locator('.guide-price').textContent()).replace(/\s/g,''), `от${group.dates['2026-10-15'].price_min}₸`, 'Show the true minimum starting price for this date before budget entry.');
       assert.equal(await field('budget_kzt').inputValue(),'');
       assert.ok(await page.locator('.price-guide').evaluate(node => Boolean(node.compareDocumentPosition(document.querySelector('[name=budget_kzt]')) & Node.DOCUMENT_POSITION_FOLLOWING)), 'Show real catalog prices before asking for a budget.');
       await sleep(800);assert.equal(posted.length,0,'Incomplete form must not auto-submit.');

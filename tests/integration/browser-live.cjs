@@ -97,7 +97,9 @@ const baseQuery = {
       assert.equal(await domCards.nth(index).locator('.profile-excerpt > p').textContent(), card.description_excerpt);
       const text = await domCards.nth(index).innerText();
       assert.ok(text.includes(card.name), 'Source name must be visible.');
-      assert.ok(text.includes(card.explanation), 'The full server explanation must be visible.');
+      const normalizeSpace = value => value.replace(/\s+/g, ' ').trim();
+      assert.ok(normalizeSpace(text).includes(normalizeSpace(card.explanation)), 'The full server explanation must be visible across visual line breaks.');
+      assert.equal(await domCards.nth(index).locator('.explanation [data-catalog-text]').textContent(), card.explanation, 'Visual emphasis must preserve the exact server explanation.');
       assert.match(await domCards.nth(index).locator('.card-price').innerText(), /^от /);
       assert.equal(await domCards.nth(index).locator('.data-source').innerText(), 'Исходный каталог');
     }

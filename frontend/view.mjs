@@ -40,7 +40,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   const brand = el("div", "brand");
   const mark = el("span", "brand-mark");
   mark.setAttribute("aria-hidden", "true");
-  brand.append(mark, el("span", "", "Умный подбор подрядчиков"));
+  brand.append(mark, el("span", "", "That's La Peace"));
   header.append(brand, el("span", "header-note", "Люди и места для вашего события"));
   const localeWrap = el('label', 'locale-switch', 'Язык интерфейса');
   const localeSelect = el('select');
@@ -59,6 +59,9 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   const workspace = el("div", "workspace");
   const brief = el("section", "brief-panel");
   brief.append(el("h2", "", "Ваше мероприятие"));
+  const searchHint = el('p', 'form-search-hint', 'В списках можно печатать, чтобы найти нужное.');
+  searchHint.id = `${uid}-search-hint`;
+  brief.append(searchHint);
   const form = el("form");
   form.id = `${uid}-form`;
   form.noValidate = true;
@@ -92,6 +95,7 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
       wrap.append(help);
     }
     input.setAttribute("aria-describedby", described.join(" "));
+    if (type === 'select') input.setAttribute('aria-describedby', `${input.getAttribute('aria-describedby')} ${searchHint.id}`);
     wrap.append(error);
     fields[name] = { input, error, wrap, label };
     return wrap;
@@ -209,13 +213,13 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
   workspace.append(brief, results);
   main.append(intro, workspace);
   const footer = el("footer", "site-footer");
-  footer.append(el("span", "", "Умный подбор подрядчиков · HackAlem AI · 2026"), el("span", "", "Подбор помогает выбрать. Бронирование в сервисе не предусмотрено."));
+  footer.append(el("span", "", "That's La Peace · HackAlem AI · 2026"), el("span", "", "Подбор помогает выбрать. Бронирование в сервисе не предусмотрено."));
   shell.append(header, main, footer);
   root.replaceChildren(skip, shell);
 
   function refreshLanguage() {
     doc.documentElement.lang = locale;
-    doc.title = translate('Умный подбор подрядчиков', locale);
+    doc.title = translate("That's La Peace", locale);
     sourceLanguage.hidden = locale === 'ru';
     localizeTree(root, locale);
   }
@@ -357,9 +361,12 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
     const selected = group.dates[fields.event_date.input.value];
     const count = selected ? selected.available : group.total;
     const min = selected ? selected.price_min : group.price_min;
-    const max = selected ? selected.price_max : group.price_max;
     priceGuide.append(el('p', 'guide-count', selected ? `На выбранную дату свободны: ${count} из ${group.total}.` : `В выбранной группе: ${count} профилей.`));
-    if (count > 0) priceGuide.append(el('p', 'guide-price', min === max ? `Начальная цена: ${money.format(min)} ₸` : `Начальные цены: ${money.format(min)}–${money.format(max)} ₸`));
+    if (count > 0) {
+      const priceSummary = el('div', 'price-guide-main');
+      priceSummary.append(el('h3', '', 'Ценовой ориентир'), el('p', 'guide-price', `от ${money.format(min)} ₸`));
+      priceGuide.prepend(priceSummary);
+    }
     priceGuide.append(el('p', 'field-hint', 'По каталогу, без учёта бюджета, языка и часов. Не итоговая смета.'));
     refreshLanguage();
   }
@@ -548,8 +555,20 @@ export function mountPicker(root, { loadMetadata, recommend, loadGuide } = {}) {
         price.append(el("span", "price-note", "начальная цена по каталогу"));
         top.append(identity, price);
         const explanation = el("div", "explanation");
-        explanation.append(el("p", "explanation-label", "Почему подходит"), el("p", "", card.explanation));
-        explanation.lastChild.dataset.catalogText = ''; explanation.lastChild.lang = 'ru';
+        const explanationText = el('p', '', card.explanation);
+        // Keep the exact source explanation; only separate the shared context
+        // visually so the profile-specific facts are easier to compare.
+        const contextEnd = card.explanation.indexOf('нет занятости. ');
+        if (contextEnd >= 0) {
+          const split = contextEnd + 'нет занятости.'.length;
+          explanationText.replaceChildren(
+            el('span', 'explanation-context', card.explanation.slice(0, split)),
+            doc.createTextNode(' '),
+            el('span', 'explanation-detail', card.explanation.slice(split + 1))
+          );
+        }
+        explanationText.dataset.catalogText = ''; explanationText.lang = 'ru';
+        explanation.append(el("p", "explanation-label", "Почему подходит"), explanationText);
         item.append(top, explanation);
         const facts = el("div", "profile-facts");
         if (Array.isArray(card.languages) && card.languages.every(value => typeof value === "string")) {
