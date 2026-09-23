@@ -23,14 +23,23 @@ const report = {started_at: new Date().toISOString(), base_url: baseUrl,
   const state = value => page.locator(`[data-state="${value}"]`).waitFor({state: 'visible'});
   const actualReply = () => page.waitForResponse(response =>
     new URL(response.url()).pathname === '/api/recommendations' && response.request().method() === 'POST');
+  async function choose(name, value) {
+    const field = page.locator(`.field:has(select[name="${name}"])`);
+    const input = field.locator('.combobox-input');
+    await input.click();
+    await input.fill('');
+    await field.locator(`.combobox-option[data-value=${JSON.stringify(value)}]`).click();
+    assert.equal(await field.locator('select').inputValue(), value, `${name}: visible selection must preserve the canonical API value.`);
+  }
   try {
     await page.goto(baseUrl);
     await state('idle');
+    await page.locator('.form-settings > summary').click();
     await page.getByRole('checkbox', {name: 'Обновлять варианты автоматически'}).uncheck();
-    await page.getByLabel('Город', {exact: true}).selectOption('Алматы');
+    await choose('city', 'Алматы');
     await page.getByLabel('Дата события').fill('2026-10-15');
-    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption('корпоратив');
-    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption('Ведущий');
+    await choose('event_type', 'корпоратив');
+    await choose('category', 'Ведущий');
     await page.getByLabel('Бюджет, ₸').fill('1000000');
     const initialReply = actualReply();
     await page.getByRole('button', {name: 'Подобрать варианты', exact: true}).click();
@@ -40,7 +49,8 @@ const report = {started_at: new Date().toISOString(), base_url: baseUrl,
     assert.equal(firstIds.length, 3);
     report.checks.push('Initial real result: three cards');
 
-    await page.getByLabel('Дата события').fill('2026-10-16');
+    await page.getByLabel('Дата события').fill('16.10.2026');
+    assert.equal(await page.locator('[name=event_date]').inputValue(), '2026-10-16');
     await state('edited');
     assert.deepEqual(await ids(), [], 'Editing must remove stale cards.');
     const before = await values();
@@ -64,6 +74,7 @@ const report = {started_at: new Date().toISOString(), base_url: baseUrl,
     await page.getByRole('button', {name: 'Попробовать ещё раз', exact: true}).click();
     const response = await restoredReply;
     assert.equal(response.status(), 200);
+    assert.equal(response.request().postDataJSON().event_date, '2026-10-16', 'The human-readable date must be sent as canonical ISO after recovery.');
     const data = await response.json();
     assert.equal(data.status, 'matched');
     assert.equal(data.eligible_count, 4);

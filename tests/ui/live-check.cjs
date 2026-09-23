@@ -57,16 +57,25 @@ function endpoint(url, pathname) {
     return page.locator('[name]').evaluateAll(nodes => Object.fromEntries(nodes.filter(node => ['INPUT', 'SELECT'].includes(node.tagName)).map(node => [node.name, node.name === 'budget_kzt' ? node.value.replace(/\s/g, '') : node.value])));
   }
 
+  async function choose(name, value) {
+    const field = page.locator(`.field:has(select[name="${name}"])`);
+    const input = field.locator('.combobox-input');
+    await input.click();
+    await input.fill('');
+    await field.locator(`.combobox-option[data-value=${JSON.stringify(value)}]`).click();
+    assert.equal(await field.locator('select').inputValue(), value, `${name}: visible selection must preserve the canonical API value.`);
+  }
+
   async function fillForm(request) {
     const before = posted.length;
-    await page.getByLabel('Город', {exact: true}).selectOption(request.city);
+    await choose('city', request.city);
     await page.getByLabel('Дата события').fill(request.event_date);
-    await page.getByLabel('Формат мероприятия', {exact: true}).selectOption(request.event_type);
-    await page.getByLabel('Кого или что ищем', {exact: true}).selectOption(request.category);
+    await choose('event_type', request.event_type);
+    await choose('category', request.category);
     await page.getByLabel('Бюджет, ₸').fill(String(request.budget_kzt));
     const optional = page.locator('details.optional-fields');
     if (await optional.getAttribute('open') === null) await optional.locator('summary').click();
-    await page.getByLabel('Язык', {exact: true}).selectOption(request.language || '');
+    await choose('language', request.language || '');
     await page.getByLabel('Длительность, ч').fill(request.duration_hours === null ? '' : String(request.duration_hours));
     assert.equal(posted.length, before, 'Editing the form must not submit automatically.');
   }
@@ -102,6 +111,8 @@ function endpoint(url, pathname) {
       assert.deepEqual(visibleIds, ids, `${id}: UI must preserve server order.`);
       assert.ok((await page.locator('.results-summary > p').first().textContent()) === data.message, `${id}: UI must show the server explanation of the outcome.`);
       assert.equal(await page.locator(`[data-explanation-mode="${data.explanation_mode}"]`).count(), 1, `${id}: explanation mode must be disclosed.`);
+      await page.locator('details.guide-details > summary').click();
+      assert.equal(await page.locator(`[data-explanation-mode="${data.explanation_mode}"]`).isVisible(), true, `${id}: explanation mode must be accessible in result details.`);
       for (let i = 0; i < data.cards.length; i++) {
         const card = data.cards[i];
         assert.equal(card.city, request.city, `${id}: city filter.`);
@@ -165,6 +176,7 @@ function endpoint(url, pathname) {
     assert.equal(meta.dataset_count, 66, 'This test baseline requires 66 profiles.');
     report.dataset_version = meta.dataset_version;
     await page.locator('[data-state="idle"]').waitFor();
+    await page.locator('.form-settings > summary').click();
     await page.locator('.auto-toggle input').uncheck();
     await page.locator('.compatibility-toggle').waitFor({state: 'visible'});
     await page.locator('.compatibility-toggle input').uncheck(); // Exercise the complete catalog, including the absent city/category outcome.
