@@ -88,10 +88,34 @@ def _eligible(profiles: list[dict[str, Any]], request: dict[str, Any]) -> list[d
 
 
 def _excerpt(profile: dict[str, Any], request: dict[str, Any]) -> str:
-    """Return an exact substring, favouring a relevant descriptive clause."""
+    """Return a concrete, exact source fragment, at most 260 characters.
+
+    Distinguishing services, equipment, ensemble composition and quantified
+    experience outrank purely promotional mentions of the requested event.
+    Within factual fragments, event relevance is still preferred. Long clauses
+    are scored in word-aligned windows so a fact near their end is not lost.
+    This selection changes explanation text only, never candidate ranking.
+    """
     description = profile["description"]
-    candidates = [part.strip() for part in re.split(r"(?<=[.!?])\s+|[\r\n•]+", description) if part.strip()]
+    clauses = [part.strip() for part in re.split(r"(?<=[.!?])\s+|[\r\n•]+", description) if part.strip()]
+    candidates: list[str] = []
+    for clause in clauses:
+        if len(clause) <= 260:
+            candidates.append(clause)
+            continue
+        words = list(re.finditer(r"\S+", clause))
+        right = 0
+        for left, word in enumerate(words):
+            right = max(right, left)
+            while right < len(words) and words[right].end() - word.start() <= 260:
+                right += 1
+            if right > left:
+                candidates.append(clause[word.start():words[right - 1].end()])
     useful = [part for part in candidates if len(part) >= 30] or candidates
+    # A single unusually long token has no word-aligned window; retain the
+    # original deterministic source-only fallback rather than inventing a fact.
+    if not useful:
+        return description[:260]
     stems = EVENT_STEMS.get(request["event_type"], _words(request["event_type"]))
     category = CATEGORY_STEMS.get(request["category"], _words(request["category"]))
     specific_stems = (
@@ -100,6 +124,8 @@ def _excerpt(profile: dict[str, Any], request: dict[str, Any]) -> str:
         "театр", "кино", "педагог", "академ", "солист", "телеканал",
         "репертуар", "сезон", "палитр", "документал", "фотожурнал",
         "сценограф", "инсталляц", "подиум", "арки", "welcome", "сахар",
+        "вокал", "квартет", "брасс", "перкусс", "клавиш", "барабан",
+        "гитар", "труба", "тромбон", "струнн",
     )
 
     def excerpt_score(part: str) -> tuple[int, ...]:
@@ -108,22 +134,24 @@ def _excerpt(profile: dict[str, Any], request: dict[str, Any]) -> str:
             r"(?:меня зовут|привет|я[ ,—–-]|профессиональн\w*\s+ведущ)", lowered
         ))
         quantified = bool(re.search(
-            r"\d[\d ]*\s+(?:лет|год|гостей|человек|заказов|мероприятий|свадеб|съемок)", lowered
+            r"\d[\d ]*\s+(?:лет|год|гостей|человек|заказов|мероприятий|свадеб|съемок|вокалист)", lowered
         ))
-        # Event relevance first; prefer concrete actions and specialties over
-        # introductions and generic role labels. This only affects the excerpt.
+        promotional = bool(re.search(
+            r"идеальн\w*|отличн\w*\s+выбор|любой\s+формат|"
+            r"незабываем\w*\s+(?:впечатлен\w*|праздник\w*)", lowered
+        ))
+        specificity = _overlap(part, specific_stems) + 2 * int(quantified)
         return (
+            int(specificity > 0),
+            -int(promotional),
             _overlap(part, stems),
+            specificity,
             -int(introduction),
-            _overlap(part, specific_stems) + 2 * int(quantified),
             _overlap(part, category),
         )
 
-    # max() preserves the first source clause when relevance is tied.
+    # max() preserves source order when factual value and relevance are tied.
     selected = max(useful, key=excerpt_score)
-    if len(selected) > 260:
-        boundary = selected.rfind(" ", 0, 261)
-        selected = selected[:boundary if boundary > 100 else 260]
     return selected.rstrip(" .!?…") or description[:260]
 
 
