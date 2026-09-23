@@ -236,3 +236,81 @@ def test_explanations_include_distinct_source_facts_not_only_names(write_catalog
     without_names = [card["explanation"].replace(card["name"], "").strip() for card in cards]
     assert len(set(without_names)) == 2
     assert len({card["description_excerpt"] for card in cards}) == 2
+
+
+def test_live_band_explanations_distinguish_composition_beyond_names(catalog, query):
+    response = recommend(catalog, {
+        **query, "category": "Лайв-бэнд", "event_type": "свадьба", "budget_kzt": 1500000,
+    })
+    assert ids(response) == ["HK-23752", "HK-83709", "HK-57480"]
+    cards = {card["id"]: card for card in response["cards"]}
+    sources = {profile["id"]: profile for profile in catalog.profiles}
+    first, second = cards["HK-23752"], cards["HK-83709"]
+    assert "два вокалиста" in first["description_excerpt"]
+    assert "вокалистка" in first["description_excerpt"]
+    assert "4 вокалиста" in second["description_excerpt"]
+    assert "струнный квартет" in second["description_excerpt"]
+    without_names = []
+    for card, group in ((first, "Thunder Breath Band"), (second, "Eva Sound")):
+        excerpt = card["description_excerpt"]
+        assert excerpt in sources[card["id"]]["description"]
+        assert "идеально впишется" not in excerpt
+        without_names.append(card["explanation"].replace(card["name"], "").replace(group, ""))
+    assert without_names[0] != without_names[1]
+
+
+def test_concrete_service_beats_generic_event_promotion(write_catalog, query):
+    fact = "Выполняем мгновенную печать снимков с брендированной рамкой."
+    description = "Идеально впишемся в любой формат корпоративного мероприятия! " + fact
+    loaded = load_catalog(write_catalog([{"description": description}]))
+    card = recommend(loaded, query)["cards"][0]
+    assert card["description_excerpt"] == fact.rstrip(".")
+    assert card["description_excerpt"] in card["explanation"]
+
+
+def test_fact_at_end_of_long_clause_survives_excerpt_limit(write_catalog, query):
+    introduction = "Наше корпоративное мероприятие будет незабываемым и удивительным, " * 6
+    fact = "состав: 4 вокалиста, струнный квартет, барабанщик, саксофон и бас-гитарист"
+    description = introduction + fact + "."
+    assert description.index(fact) > 260
+    loaded = load_catalog(write_catalog([{"description": description}]))
+    card = recommend(loaded, query)["cards"][0]
+    excerpt = card["description_excerpt"]
+    assert 0 < len(excerpt) <= 260
+    assert excerpt in description
+    assert "4 вокалиста" in excerpt
+    assert "струнный квартет" in excerpt
+    assert "бас-гитарист" in excerpt
+
+
+@pytest.mark.parametrize("max_hours,duration,expected", [
+    ("6", 4, "4 ч при лимите 6 ч"),
+    ("", 4, "присутствие по часам неприменимо"),
+])
+def test_compact_explanation_preserves_requested_constraints(write_catalog, query, max_hours, duration, expected):
+    fact = "Проводит встречи с авторскими викторинами."
+    loaded = load_catalog(write_catalog([{
+        "price_from_kzt": "100", "max_hours": max_hours, "description": fact,
+    }]))
+    card = recommend(loaded, {
+        **query, "budget_kzt": 150, "language": "русский", "duration_hours": duration,
+    })["cards"][0]
+    explanation = card["explanation"]
+    assert "Алматы" in explanation and "корпоратив" in explanation
+    assert "цена от 100 ₸ в бюджете" in explanation
+    assert "в календаре на 2026-10-15 нет занятости" in explanation
+    assert "язык — русский" in explanation
+    assert expected in explanation
+    assert card["description_excerpt"] == fact.rstrip(".")
+    assert card["description_excerpt"] in explanation
+    assert explanation.count(".") == 2
+    assert "150" not in explanation  # The entered budget need not be repeated.
+
+
+def test_compact_explanation_does_not_invent_optional_requests(write_catalog, query):
+    loaded = load_catalog(write_catalog([{"max_hours": "6"}]))
+    card = recommend(loaded, {**query, "language": None, "duration_hours": None})["cards"][0]
+    prefix = card["explanation"].split(". Из описания:", 1)[0]
+    assert "язык" not in prefix
+    assert "лимит" not in prefix
+    assert "неприменимо" not in prefix
