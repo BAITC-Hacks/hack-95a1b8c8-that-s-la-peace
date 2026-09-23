@@ -281,3 +281,36 @@ def test_fact_at_end_of_long_clause_survives_excerpt_limit(write_catalog, query)
     assert "4 вокалиста" in excerpt
     assert "струнный квартет" in excerpt
     assert "бас-гитарист" in excerpt
+
+
+@pytest.mark.parametrize("max_hours,duration,expected", [
+    ("6", 4, "4 ч при лимите 6 ч"),
+    ("", 4, "присутствие по часам неприменимо"),
+])
+def test_compact_explanation_preserves_requested_constraints(write_catalog, query, max_hours, duration, expected):
+    fact = "Проводит встречи с авторскими викторинами."
+    loaded = load_catalog(write_catalog([{
+        "price_from_kzt": "100", "max_hours": max_hours, "description": fact,
+    }]))
+    card = recommend(loaded, {
+        **query, "budget_kzt": 150, "language": "русский", "duration_hours": duration,
+    })["cards"][0]
+    explanation = card["explanation"]
+    assert "Алматы" in explanation and "корпоратив" in explanation
+    assert "цена от 100 ₸ в бюджете" in explanation
+    assert "в календаре на 2026-10-15 нет занятости" in explanation
+    assert "язык — русский" in explanation
+    assert expected in explanation
+    assert card["description_excerpt"] == fact.rstrip(".")
+    assert card["description_excerpt"] in explanation
+    assert explanation.count(".") == 2
+    assert "150" not in explanation  # The entered budget need not be repeated.
+
+
+def test_compact_explanation_does_not_invent_optional_requests(write_catalog, query):
+    loaded = load_catalog(write_catalog([{"max_hours": "6"}]))
+    card = recommend(loaded, {**query, "language": None, "duration_hours": None})["cards"][0]
+    prefix = card["explanation"].split(". Из описания:", 1)[0]
+    assert "язык" not in prefix
+    assert "лимит" not in prefix
+    assert "неприменимо" not in prefix

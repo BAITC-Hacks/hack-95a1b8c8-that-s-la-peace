@@ -162,18 +162,17 @@ def _money(amount: int) -> str:
 def _card(profile: dict[str, Any], request: dict[str, Any]) -> dict[str, Any]:
     excerpt = _excerpt(profile, request)
     details = [
-        f"В каталоге указан город {profile['city']} и формат «{request['event_type']}»",
-        f"на {request['event_date']} занятость не указана",
-        f"цена от {_money(profile['price_from_kzt'])} ₸ не превышает бюджет {_money(request['budget_kzt'])} ₸",
+        f"{profile['city']}, «{request['event_type']}»: цена от {_money(profile['price_from_kzt'])} ₸ в бюджете",
+        f"в календаре на {request['event_date']} нет занятости",
     ]
     if request.get("language") is not None:
-        details.append(f"указан язык {request['language']}")
+        details.append(f"язык — {request['language']}")
     if request.get("duration_hours") is not None:
         if profile["max_hours"] is None:
-            details.append("лимит присутствия по часам неприменим")
+            details.append("присутствие по часам неприменимо")
         else:
-            details.append(f"запрошенные {request['duration_hours']:g} ч укладываются в лимит {profile['max_hours']} ч")
-    explanation = "; ".join(details) + f". В описании профиля: «{excerpt}»."
+            details.append(f"{request['duration_hours']:g} ч при лимите {profile['max_hours']} ч")
+    explanation = "; ".join(details) + f". Из описания: «{excerpt}»."
     return {
         "id": profile["id"],
         "name": profile["anon_name"],
